@@ -1,6 +1,9 @@
 apply plugin: "java"
 apply plugin: "eclipse"
 
+archivesBaseName=rootProject.name+"-"+project.name+"-"+rootProject.version
+
 dependencies { 
 	compile group: 'org.apache.commons', name: 'commons-csv', version: '1.4'
 }
+

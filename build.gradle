@@ -1,7 +1,30 @@
-subprojects {
 
+/*
+ * Gets the version name from the latest Git tag
+ */
+ext.getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    def res = stdout.toString().trim()
+    def stdout2 = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'log', '--pretty=format:\'%h\'', '-n', '1'
+        standardOutput = stdout2
+    }
+    res = res + '+' + stdout2.toString().replaceAll('\'', '').trim()
+    return res
+}
+
+group "hu.vissy"
+version ext.getVersionName()
+
+subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
     }
 }
+
