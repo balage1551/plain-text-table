@@ -44,7 +44,6 @@ public class ColumnDefinition {
          *            Type of the column.
          * @param title
          *            The title of the column.
-         * @see {@linkplain #withTitle(String)}
          */
         public Builder(ColumnType<?> type, String title) {
             super();
@@ -81,12 +80,10 @@ public class ColumnDefinition {
          *             If the minWidth is negative or higher than the maxWidth.
          */
         public ColumnDefinition.Builder withMinWidth(int minWidth) {
-            if (minWidth < 0) {
+            if (minWidth < 0)
                 throw new IllegalArgumentException("Minimal width should be non-negative.");
-            }
-            if (minWidth > maxWidth) {
+            if (minWidth > maxWidth)
                 throw new IllegalArgumentException("Minimal width should be less or equal than the maximal width.");
-            }
             this.minWidth = minWidth;
             return this;
         }
@@ -99,12 +96,10 @@ public class ColumnDefinition {
          *             If the maxWidth is negative or less than the minWidth.
          */
         public ColumnDefinition.Builder withMaxWidth(int maxWidth) {
-            if (maxWidth < 0) {
+            if (maxWidth < 0)
                 throw new IllegalArgumentException("Maximal width should be non-negative.");
-            }
-            if (maxWidth > maxWidth) {
+            if (maxWidth > maxWidth)
                 throw new IllegalArgumentException("Maximal width should be greater or equal than the minimal width.");
-            }
             this.maxWidth = maxWidth;
             return this;
         }

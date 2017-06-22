@@ -9,6 +9,7 @@ ext.getVersionName = { ->
         standardOutput = stdout
     }
     def res = stdout.toString().trim()
+    print "res ${res}\n"
     def stdout2 = new ByteArrayOutputStream()
     exec {
         commandLine 'git', 'log', '--pretty=format:\'%h\'', '-n', '1'

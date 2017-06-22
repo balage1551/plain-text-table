@@ -1,0 +1,10 @@
+/test-output/
+build/
+/.classpath
+/.project
+bin/
+.settings/
+repo/
+.gradle/
+*.log
+gradle.properties

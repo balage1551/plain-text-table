@@ -10,8 +10,6 @@ import hu.vissy.texttable.columndefinition.ColumnDefinition;
  * Table definition form dynamic table printers (both implementations)
  *
  * @author balage
- * @see {@linkplain DynamicTablePrinter}
- * @see {@linkplain ConfigurableTablePrinter}
  */
 public class DynamicTableDefinition {
 

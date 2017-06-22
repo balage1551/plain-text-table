@@ -51,8 +51,8 @@ public class PrinterColumnList<D> {
     /**
      * Adds a column to the column list.
      *
-     * @param column
-     *            The column to add.
+     * @param columns
+     *            The column list to add.
      * @return The object itself (fluent api)
      */
     @SafeVarargs
@@ -72,9 +72,9 @@ public class PrinterColumnList<D> {
      * @return The object itself (fluent api)
      */
     public PrinterColumnList<D> addColumn(AbstractPrinterColumn<D, ?, ?, ?> column) {
-        if (findByTitle(column.getTitle()).isPresent()) {
+        if (findByTitle(column.getTitle()).isPresent())
             throw new IllegalArgumentException("Name is duplicated: " + column.getTitle());
-        } else {
+        else {
             columns.add(column);
         }
         return this;
