@@ -1,4 +1,4 @@
-package hu.vissy.texttable;
+package hu.vissy.texttable.legacy;
 
 import java.util.ArrayList;
 import java.util.Collections;

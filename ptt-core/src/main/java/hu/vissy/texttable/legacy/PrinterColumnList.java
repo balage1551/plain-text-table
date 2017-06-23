@@ -1,4 +1,4 @@
-package hu.vissy.texttable;
+package hu.vissy.texttable.legacy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import hu.vissy.texttable.ConfigurableTablePrinter.TableRow;
-import hu.vissy.texttable.DynamicTableDefinition.Builder;
+import hu.vissy.texttable.legacy.ConfigurableTablePrinter.TableRow;
+import hu.vissy.texttable.legacy.DynamicTableDefinition.Builder;
 
 /**
  * The list of the printer columns. This helps the user to construct, manage and

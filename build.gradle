@@ -32,11 +32,11 @@ ext.getVersionName = { ->
 
 group "hu.vissy"
 version ext.getVersionName()
-
+println "Current version: ${version}"
 
 task printVersion {
 	doLast {
-		println version 
+		println "Current version: ${version}" 
 	} 
 }
 
@@ -44,6 +44,12 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+    }
+    
+    apply plugin: 'java'
+    
+    dependencies {
+        testCompile group: 'org.testng', name: 'testng', version: '6.+'
     }
 }
 
