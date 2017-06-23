@@ -1,4 +1,4 @@
 rootProject.name="ptt"
 
-include "core"
-include "tester"
+include "ptt-core"
+include "ptt-tester"
