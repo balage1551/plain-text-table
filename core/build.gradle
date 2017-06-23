@@ -20,7 +20,7 @@ apply plugin: "signing"
 //}
 
 // project information
-group = 'hu.vissy.ptt'
+group = 'hu.vissy.plain-text-table'
 version = rootProject.version
 //archivesBaseName=rootProject.name+"-"+project.name+"-"+project.version
 
@@ -59,12 +59,18 @@ uploadArchives {
         mavenDeployer {
             // POM signature
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+	
             // Target repository
-				repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+		    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 	authentication(userName: project.properties.ossrhUser, password: project.properties.ossrhPassword)
-                }
+		    }
+		
+			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                	authentication(userName: project.properties.ossrhUser, password: project.properties.ossrhPassword)
+		    }
                 
-                pom.project {
+            pom.project {
                 name project.name
 				description 'A customizable plain-text based table generator'
                 packaging 'jar'
