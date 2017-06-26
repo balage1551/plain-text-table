@@ -71,7 +71,7 @@ public class TableFormatter<D> {
 
 
     public String apply(List<D> data) {
-        TableData<D> td = new TableData<>(columns, data, showAggregation);
+        TableData<D> td = processData(data);
         List<Integer> widths = td.getColumnWidths();
         for (int i = 0; i < columns.size(); i++) {
             widths.set(i, columns.get(i).getCellContentFormatter().boundWidth(widths.get(i)));
@@ -120,8 +120,13 @@ public class TableFormatter<D> {
         }
         sb.append(borderFormatter.drawLine(widths, LineType.BOTTOM_EDGE, false));
 
-        System.out.println(sb);
-        return null;
+        return sb.toString();
+    }
+
+
+    public TableData<D> processData(List<D> data) {
+        TableData<D> td = new TableData<>(columns, data, showAggregation);
+        return td;
     }
 
 }

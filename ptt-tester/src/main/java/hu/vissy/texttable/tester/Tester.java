@@ -25,7 +25,7 @@ import hu.vissy.texttable.dataextractor.DataExtractor;
 public class Tester {
 
     public static void main(String[] args) {
-        new Tester().run();
+        new Tester().run2();
     }
 
     private static final String[] FRUITS = new String[] { "apple", "banana", "cherry", "date",
@@ -35,10 +35,29 @@ public class Tester {
         Random r = new Random(150);
         return IntStream.range(0, count)
                 .mapToObj(i -> {
-                    if (i == 7 || i == 11) {
+                    if (i == 1 || i == 11) {
                         return null;
                     } else {
                         return new TestObject(i, FRUITS[r.nextInt(FRUITS.length)],
+                                Math.floor(100 * r.nextDouble()) / 10,
+                                LocalDateTime.now().plusSeconds(
+                                        r.nextInt(7200) - 3600),
+                                Duration.ofSeconds(r.nextInt(8 * 7200)),
+                                r.nextDouble() < .33,
+                                r.nextInt(500000));
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<TestObject> generate2(int count) {
+        Random r = new Random(150);
+        return IntStream.range(0, count)
+                .mapToObj(i -> {
+                    if (i == 2 || i == 11) {
+                        return null;
+                    } else {
+                        return new TestObject(i, FRUITS[i],
                                 Math.floor(100 * r.nextDouble()) / 10,
                                 LocalDateTime.now().plusSeconds(
                                         r.nextInt(7200) - 3600),
@@ -132,4 +151,34 @@ public class Tester {
                 .build();
         formatter.apply(generate(15));
     }
+
+    private void run2() {
+        TableFormatter<TestObject> formatter = new TableFormatter.Builder<TestObject>()
+                .withHeading("Heading")
+                .withShowAggregation(true)
+                .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.NO_VERTICAL).build())
+                .withSeparateDataWithLines(true)
+                .withColumn(new ColumnDefinition.StatelessBuilder<TestObject, String>()
+                        .withTitle("Column #1")
+                        .withAggregateRowConstant("TOTAL")
+                        .withDataExtractor(o -> o.getName())
+                        .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
+                        .build())
+                .withColumn(new ColumnDefinition.Builder<TestObject, Sum, Double>()
+                        .withTitle("Column #2")
+                        .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
+                        .withDataConverter(NumberDataConverter.defaultDoubleFormatter())
+                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                            double v = o.getQuantity();
+                            s.sum += v;
+                            return v;
+                        }, () -> new Sum(), (s) -> s.sum))
+                        .build())
+                .build();
+        String s = formatter.apply(generate2(4));
+        s = s.replaceAll("\n", "\n         * ");
+        System.out.println(s);
+
+    }
+
 }
