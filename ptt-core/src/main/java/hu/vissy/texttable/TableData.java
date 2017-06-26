@@ -80,7 +80,8 @@ public class TableData<D> {
             for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
                 TableData<D>.ColumnInfo ci = columns.get(columnIndex);
                 ColumnDefinition<D, ?, ?> cd = ci.getDefinition();
-                String value = cd.getAggregateData(ci.getState());
+                String value = cd.getAggregateRowConstant()
+                                .orElse(cd.getAggregateData(ci.getState()));
                 aggregateRow.setData(columnIndex, value);
             }
         }
@@ -91,7 +92,7 @@ public class TableData<D> {
             for (TableRow r : rows) {
                 if (r != separator) {
                     int w = r.getValue(columnIndex).length();
-                    if (w < maxWidth) {
+                    if (w > maxWidth) {
                         maxWidth = w;
                     }
                 }
@@ -115,6 +116,10 @@ public class TableData<D> {
 
     public List<TableRow> getRows() {
         return rows;
+    }
+
+    public TableRow getAggregateRow() {
+        return aggregateRow;
     }
 
     public boolean isSeparator(TableRow tr) {

@@ -4,7 +4,7 @@ public class TrivialDataConverter<T> implements DataConverter<T> {
 
     @Override
     public String convert(T data) {
-        return data == null ? "null" : data.toString();
+        return data == null ? "" : data.toString();
     }
 
 }

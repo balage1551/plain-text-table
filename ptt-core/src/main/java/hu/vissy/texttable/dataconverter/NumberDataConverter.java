@@ -1,5 +1,6 @@
 package hu.vissy.texttable.dataconverter;
 
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 
 public class NumberDataConverter<T extends Number> implements DataConverter<T> {
@@ -7,7 +8,11 @@ public class NumberDataConverter<T extends Number> implements DataConverter<T> {
     NumberFormat formatter;
 
     public NumberDataConverter() {
-        this(NumberFormat.getInstance());
+        this.formatter = NumberFormat.getInstance();
+        formatter.setMaximumFractionDigits(2);
+        formatter.setMinimumFractionDigits(2);
+        formatter.setGroupingUsed(false);
+        formatter.setRoundingMode(RoundingMode.HALF_UP);
     }
 
 
@@ -20,9 +25,8 @@ public class NumberDataConverter<T extends Number> implements DataConverter<T> {
 
     @Override
     public String convert(T data) {
-        if (data == null) {
+        if (data == null)
             return null;
-        }
 
         return formatter.format(data);
     }
