@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import hu.vissy.texttable.BorderFormatter.LineType;
+import hu.vissy.texttable.BorderFormatter.RowType;
 import hu.vissy.texttable.column.ColumnDefinition;
 
 public class TableFormatter<D> {
@@ -13,7 +14,7 @@ public class TableFormatter<D> {
 
     public static class Builder<D> {
         private List<ColumnDefinition<D, ?, ?>> columns;
-        private BorderFormatter borderFormatter = new BorderFormatter();
+        private BorderFormatter borderFormatter = new BorderFormatter.Builder(BorderFormatter.DEFAULT_TYPE).build();
         private String heading = null;
         private boolean showAggregation = false;
         private boolean separateDataWithLines = false;
@@ -75,22 +76,21 @@ public class TableFormatter<D> {
         for (int i = 0; i < columns.size(); i++) {
             widths.set(i, columns.get(i).getCellContentFormatter().boundWidth(widths.get(i)));
         }
-        System.out.println(widths);
 
         StringBuilder sb = new StringBuilder();
         if (heading != null) {
             sb.append(borderFormatter.drawLine(widths, LineType.TOP_EDGE, true));
             sb.append(borderFormatter.drawData(
-                            Collections.singletonList(String.format("%1$-" + borderFormatter.calculateOneColumnWidth(widths) + "s", heading)),
-                            LineType.HEADING));
+                    Collections.singletonList(String.format("%1$-" + borderFormatter.calculateOneColumnWidth(widths) + "s", heading)),
+                    RowType.HEADING));
             sb.append(borderFormatter.drawLine(widths, LineType.HEADING_LINE, false));
         } else {
             sb.append(borderFormatter.drawLine(widths, LineType.TOP_EDGE, false));
         }
 
         sb.append(borderFormatter.drawData(columns.stream()
-                        .map(cd -> cd.getCellContentFormatter().formatCell(cd.getTitle(), widths.get(cd.getIndex())))
-                        .collect(Collectors.toList()), LineType.HEADER));
+                .map(cd -> cd.getCellContentFormatter().formatCell(cd.getTitle(), widths.get(cd.getIndex())))
+                .collect(Collectors.toList()), RowType.HEADER));
         sb.append(borderFormatter.drawLine(widths, LineType.HEADER_LINE, false));
 
         boolean prevSep = true;
@@ -103,19 +103,19 @@ public class TableFormatter<D> {
                     sb.append(borderFormatter.drawLine(widths, LineType.INTERNAL_LINE, false));
                 }
                 sb.append(borderFormatter.drawData(columns.stream()
-                                .map(cd -> cd.getCellContentFormatter().formatCell(tr.getValue(cd.getIndex()), widths.get(cd.getIndex())))
-                                .collect(Collectors.toList()), LineType.DATA));
+                        .map(cd -> cd.getCellContentFormatter().formatCell(tr.getValue(cd.getIndex()), widths.get(cd.getIndex())))
+                        .collect(Collectors.toList()), RowType.DATA));
                 prevSep = false;
             }
         }
         if (showAggregation) {
             sb.append(borderFormatter.drawLine(widths, LineType.AGGREGATE_LINE, false));
             sb.append(borderFormatter.drawData(
-                            columns.stream().map(cd -> cd.getCellContentFormatter().formatCell(
-                                            td.getAggregateRow().getValue(cd.getIndex()),
-                                            widths.get(cd.getIndex())))
+                    columns.stream().map(cd -> cd.getCellContentFormatter().formatCell(
+                            td.getAggregateRow().getValue(cd.getIndex()),
+                            widths.get(cd.getIndex())))
                             .collect(Collectors.toList()),
-                            LineType.AGGREGATE));
+                    RowType.AGGREGATE));
 
         }
         sb.append(borderFormatter.drawLine(widths, LineType.BOTTOM_EDGE, false));

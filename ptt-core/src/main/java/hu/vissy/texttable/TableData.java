@@ -81,7 +81,7 @@ public class TableData<D> {
                 TableData<D>.ColumnInfo ci = columns.get(columnIndex);
                 ColumnDefinition<D, ?, ?> cd = ci.getDefinition();
                 String value = cd.getAggregateRowConstant()
-                                .orElse(cd.getAggregateData(ci.getState()));
+                        .orElse(cd.getAggregateData(ci.getState()));
                 aggregateRow.setData(columnIndex, value);
             }
         }
@@ -98,7 +98,7 @@ public class TableData<D> {
                 }
             }
             if (calculateAggregation) {
-                maxWidth = Math.max(maxWidth, aggregateRow.getValue(columnIndex).length());
+                maxWidth = Math.max(maxWidth, aggregateRow.getValue(columnIndex) == null ? 0 : aggregateRow.getValue(columnIndex).length());
             }
 
             ci.setWidth(maxWidth);

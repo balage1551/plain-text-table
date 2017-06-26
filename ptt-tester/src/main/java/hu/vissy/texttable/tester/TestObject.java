@@ -10,16 +10,18 @@ public class TestObject {
     private double quantity;
     private LocalDateTime date;
     private Duration duration;
+    private boolean valid;
+    private int length;
 
-
-    public TestObject(long id, String name, double quantity, LocalDateTime date,
-                    Duration duration) {
+    public TestObject(long id, String name, double quantity, LocalDateTime date, Duration duration, boolean valid, int length) {
         super();
         this.id = id;
         this.name = name;
         this.quantity = quantity;
         this.date = date;
         this.duration = duration;
+        this.valid = valid;
+        this.length = length;
     }
 
     public long getId() {
@@ -41,5 +43,15 @@ public class TestObject {
     public Duration getDuration() {
         return duration;
     }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+
 
 }
