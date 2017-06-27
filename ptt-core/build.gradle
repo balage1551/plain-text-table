@@ -2,6 +2,7 @@ apply plugin: "java"
 apply plugin: "eclipse"
 apply plugin: "maven"
 apply plugin: "signing"
+apply plugin: 'checkstyle'
 
 //
 //uploadArchives {
@@ -18,6 +19,11 @@ apply plugin: "signing"
 //        }
 //    }
 //}
+
+
+checkstyle {
+   toolVersion ="7.8.2"
+}
 
 // project information
 group = 'hu.vissy.plain-text-table'

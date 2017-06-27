@@ -48,6 +48,16 @@ subprojects {
     
     apply plugin: 'java'
     
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    compileJava.options.encoding = 'UTF-8'
+
+    javadoc {
+        options.charSet = 'UTF-8'
+        options.encoding = 'UTF-8'
+        
+    }
+    
     dependencies {
         testCompile group: 'org.testng', name: 'testng', version: '6.+'
     }

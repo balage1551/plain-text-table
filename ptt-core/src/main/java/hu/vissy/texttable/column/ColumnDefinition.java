@@ -9,12 +9,24 @@ import hu.vissy.texttable.dataconverter.TrivialDataConverter;
 import hu.vissy.texttable.dataextractor.DataExtractor;
 import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
 
+/**
+ * The column definition implementation.
+ * 
+ * @author Balage
+ *
+ * @param <D>
+ *            The type of the input record.
+ * @param <S>
+ *            The type of the state class.
+ * @param <T>
+ *            The type of the cell value.
+ */
 public class ColumnDefinition<D, S, T> {
 
 
     protected static class BuilderBase<D, S, T, A extends BuilderBase<D, S, T, A>> {
         protected CellContentFormatter cellContentFormatter = CellContentFormatter
-                        .leftAlignedCell();
+                .leftAlignedCell();
         protected String title = "";
         protected DataConverter<T> dataConverter = new TrivialDataConverter<>();
         protected DataExtractor<D, S, T> dataExtractor;
@@ -55,8 +67,9 @@ public class ColumnDefinition<D, S, T> {
         }
 
         public ColumnDefinition<D, S, T> build() {
-            if (dataExtractor == null)
+            if (dataExtractor == null) {
                 throw new IllegalStateException("dataExtractor should be set.");
+            }
             return new ColumnDefinition<>(this);
         }
     }
@@ -65,10 +78,10 @@ public class ColumnDefinition<D, S, T> {
     }
 
     public static class StatelessBuilder<D, T>
-    extends BuilderBase<D, Void, T, StatelessBuilder<D, T>> {
+            extends BuilderBase<D, Void, T, StatelessBuilder<D, T>> {
 
         public StatelessBuilder<D, T> withDataExtractor(
-                        StatelessDataExtractor<D, T> dataExtractor) {
+                StatelessDataExtractor<D, T> dataExtractor) {
             this.dataExtractor = dataExtractor;
             return this;
         }

@@ -48,6 +48,7 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * <p>
  * Through these steps, several type arguments are used. Here is the short
  * overview of them:
+ * </p>
  * <ul>
  * <li><b>Record data (D)</b>: represents an input record. Can be any Java
  * class.</li>
@@ -57,14 +58,13 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * travelling from record to record, mostly for aggregation), this class
  * represents the state data. Can be any Java class.</li>
  * </ul>
- * </p>
- * <h2>Data extraction (D -> T)</h2>
+ * <h2>Data extraction (D ➜ T)</h2>
  * <p>
  * In this phase, the cell data (T) is extracted from the record (D). The
  * extraction is made by the {@linkplain DataExtractor} (stateful) and the
  * {@linkplain StatelessDataExtractor} (stateless) classes.
  * </p>
- * <h2>Data conversion (T -> String)</h2>
+ * <h2>Data conversion (T ➜ String)</h2>
  * <p>
  * In this phase, the cell data (T) is converted and formatted into a string.
  * Here type specific formatting is possible, such as numeric or date/time
@@ -84,12 +84,13 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * <p>
  * In this phase, the converted cell data is decorated by the rules defined for
  * its column. The following conversions are made:
+ * </p>
+ * <ul>
  * <li><b>Shortening (if the data is too long)</b>: the data is truncated and
  * elipsis is added to it.</li>
  * <li><b>Internal padding (if the data is too short)</b>: the data is padded
  * according the columns alignment.</li>
  * </ul>
- * </p>
  * <p>
  * An important fact, on which the table formatter is based: at the end of this
  * step, the cell data has the exact length (neither shorter nor longer) of the
@@ -106,7 +107,6 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * It is possible to add record separators between records by inserting
  * <code>null</code> values in the input.
  * </p>
- * <br/>
  * <h1>Getting started (a simple example)</h1>
  * <p>
  * Most of the API uses builders and fluent API, so the table declaration could
@@ -114,64 +114,71 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * </p>
  * <p>
  * First we define a record to print. It's simple and has only two data fields:
+ * </p>
  *
  * <pre>
- * private class JavaDocDemoRecord {
- *     private String fruit;
- *     private Double quantity;
+ * <code>
+ *     private class JavaDocDemoRecord {
+ *         private String fruit;
+ *         private Double quantity;
  *
- *     public JavaDocDemoRecord(String fruit, Double quantity) {
- *         super();
- *         this.fruit = fruit;
- *         this.quantity = quantity;
- *     }
+ *         public JavaDocDemoRecord(String fruit, Double quantity) {
+ *             super();
+ *             this.fruit = fruit;
+ *             this.quantity = quantity;
+ *         }
  *
- *     public String getFruit() {
- *         return fruit;
- *     }
+ *         public String getFruit() {
+ *             return fruit;
+ *         }
  *
- *     public Double getQuantity() {
- *         return quantity;
+ *         public Double getQuantity() {
+ *             return quantity;
+ *         }
  *     }
- * }
+ * </code>
  * </pre>
  * <p>
  * Also, we will need an aggregation object for quantity:
+ * </p>
  *
  * <pre>
  * private class JavaDocDemoAggregator {
  *     public double sum;
  * }
  * </pre>
- * </p>
  * <p>
  * Now we can define the table:
+ * </p>
  *
  * <pre>
- * TableFormatter<JavaDocDemoRecord> formatter = new TableFormatter.Builder<JavaDocDemoRecord>()
+ * <code>
+ * {@code TableFormatter<JavaDocDemoRecord> formatter = new TableFormatter.Builder<JavaDocDemoRecord>()}
  *         .withHeading("Java doc demo")
  *         .withShowAggregation(true)
  *         .withSeparateDataWithLines(true)
  *         .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.ASCII_LINEDRAW_DOUBLE).build())
- *         .withColumn(new ColumnDefinition.StatelessBuilder<JavaDocDemoRecord, String>()
+ *         .withColumn(new ColumnDefinition.StatelessBuilder{@code <JavaDocDemoRecord, String>()}
  *                 .withTitle("Fruit")
  *                 .withAggregateRowConstant("TOTAL")
- *                 .withDataExtractor(o -> o.getFruit())
+ *                 .withDataExtractor(o -&gt; o.getFruit())
  *                 .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
  *                 .build())
- *         .withColumn(new ColumnDefinition.Builder<JavaDocDemoRecord, JavaDocDemoAggregator, Double>()
+ *         .withColumn(new ColumnDefinition.Builder{@code <JavaDocDemoRecord, JavaDocDemoAggregator, Double>()}
  *                 .withTitle("Quantity")
  *                 .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
  *                 .withDataConverter(NumberDataConverter.defaultDoubleFormatter())
- *                 .withDataExtractor(new DataExtractor<>((o, s) -> {
+ *                 .withDataExtractor(new DataExtractor{@code <>}((o, s) -&gt; {
  *                     double v = o.getQuantity();
  *                     s.sum += v;
  *                     return v;
- *                 }, () -> new JavaDocDemoAggregator(), (s) -> s.sum))
+ *                 }, () -&gt; new JavaDocDemoAggregator(), (s) -&gt; s.sum))
  *                 .build())
  *         .build();
+ * </code>
  * </pre>
  *
+ * <p>
  * Let's have a statement by statement overlook of the above code. First of all,
  * the {@linkplain TableFormatter} uses build pattern, so we instatiate a
  * builder with the type of our record. By calling the
@@ -192,7 +199,7 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * title to the column
  * ({@linkplain ColumnDefinition.StatelessBuilder#withTitle(String)}) and tell
  * it to use a string constant in the aggregation line
- * ({@linkplain {@linkplain ColumnDefinition.StatelessBuilder#withAggregateRowConstant(String)}).
+ * ({@linkplain ColumnDefinition.StatelessBuilder#withAggregateRowConstant(String)}).
  * Because it is a stateless column, we can pass a closure as data extractor
  * ({@linkplain ColumnDefinition.StatelessBuilder#withDataExtractor(java.util.function.Function)}).
  * Finally, we choose a left aligned cell formatter (this is the default) but
@@ -213,27 +220,34 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * <p>
  * That's it! Now our table is configured and ready to use. Let's make some data
  * to print:
+ * </p>
  *
  * <pre>
- * List<JavaDocDemoRecord> data = new ArrayList<>();
+ * <code>
+ * {@code List<JavaDocDemoRecord> data = new ArrayList<>();}
  * data.add(new JavaDocDemoRecord("apple", 120.5d));
  * data.add(new JavaDocDemoRecord("banana", 20.119d));
  * data.add(null);
  * data.add(new JavaDocDemoRecord("cherry", 1551d));
+ * </code>
  * </pre>
  *
+ * <p>
  * Note the third record: it is null indicating there should be a inter-record
  * separator inserted.
  * </p>
  * <p>
  * There is only one task left: to apply the formatter on the data.
+ * </p>
  *
  * <pre>
  * String s = formatter.apply(data);
  * System.out.println(s);
  * </pre>
  *
+ * <p>
  * The output should be something like this:
+ * </p>
  *
  * <pre>
  * +=====================+
@@ -250,7 +264,6 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * | TOTAL    |  1691,62 |
  * +==========+==========+
  * </pre>
- * </p>
  * <p>
  * This was a very simple example only showing the general usage of the API.
  * There are many additional configuration possibilities this example didn't

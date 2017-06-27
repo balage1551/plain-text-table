@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * The border formatter responsible for drawing the table decoration around the
  * data: the vertical and horizontal lines, the padding, the outer borders
  * (called edge).
- * <p>
+ * </p>
  *
  * <p>
  * The {@linkplain DefaultFormatters} enum contains some default configurations
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  * Each table contains rows of data and horizontal lines between them. The rows
  * can be data, heading, header or aggregate rows. Each line and row is split
  * into different parts:
+ * </p>
  *
  * <pre>
  * | Column data | Other column |
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
  *   ^^^^^^^^^^^---^^^^^^^^^^^^---- Body (only for lines)
  * </pre>
  *
+ * <p>
  * Each of these part can be independently configured.
  * </p>
  *
@@ -52,7 +54,7 @@ public class BorderFormatter {
      * <p>
      * Each line has different parts (left edge, internal separator, right edge,
      * padding zone and body) which can be individually configured.
-     * <p>
+     * </p>
      *
      * <p>
      * This class is imutable, so it can be safely used in multiple places.
@@ -203,7 +205,7 @@ public class BorderFormatter {
      * <p>
      * Each row has different parts (left edge, internal separator, right edge,
      * padding zone) which can be individually configured.
-     * <p>
+     * </p>
      *
      * <p>
      * This class is imutable, so it can be safely used in multiple places.
@@ -605,7 +607,7 @@ public class BorderFormatter {
         /**
          * Sets whether vertical separator lines are drawn between columns.
          *
-         * @param drawVerticalEdge
+         * @param drawVerticalSeparator
          *            If true, a vertical line is drawn between each columns. If
          *            false, this lines are omitted.
          * @return The builder instance.
@@ -745,7 +747,7 @@ public class BorderFormatter {
          *
          * @param fromType
          *            The row type to copy the specification from.
-         * @param toTypes
+         * @param toType
          *            The row types to copy the specification to.
          * @return The builder instance.
          */
