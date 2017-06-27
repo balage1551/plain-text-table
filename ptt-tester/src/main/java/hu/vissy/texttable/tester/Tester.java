@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import hu.vissy.texttable.dataextractor.DataExtractor;
 public class Tester {
 
     public static void main(String[] args) {
-        new Tester().run2();
+        new Tester().runJavaDocDemo();
     }
 
     private static final String[] FRUITS = new String[] { "apple", "banana", "cherry", "date",
@@ -177,6 +178,64 @@ public class Tester {
                 .build();
         String s = formatter.apply(generate2(4));
         s = s.replaceAll("\n", "\n         * ");
+        System.out.println(s);
+
+    }
+
+    private class JavaDocDemoRecord {
+        private String fruit;
+        private Double quantity;
+
+        public JavaDocDemoRecord(String fruit, Double quantity) {
+            super();
+            this.fruit = fruit;
+            this.quantity = quantity;
+        }
+
+        public String getFruit() {
+            return fruit;
+        }
+
+        public Double getQuantity() {
+            return quantity;
+        }
+    }
+
+    private class JavaDocDemoAggregator {
+        public double sum;
+    }
+
+    private void runJavaDocDemo() {
+        TableFormatter<JavaDocDemoRecord> formatter = new TableFormatter.Builder<JavaDocDemoRecord>()
+                .withHeading("Java doc demo")
+                .withShowAggregation(true)
+                .withSeparateDataWithLines(true)
+                .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.ASCII_LINEDRAW_DOUBLE).build())
+                .withColumn(new ColumnDefinition.StatelessBuilder<JavaDocDemoRecord, String>()
+                        .withTitle("Fruit")
+                        .withAggregateRowConstant("TOTAL")
+                        .withDataExtractor(o -> o.getFruit())
+                        .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
+                        .build())
+                .withColumn(new ColumnDefinition.Builder<JavaDocDemoRecord, JavaDocDemoAggregator, Double>()
+                        .withTitle("Quantity")
+                        .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
+                        .withDataConverter(NumberDataConverter.defaultDoubleFormatter())
+                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                            double v = o.getQuantity();
+                            s.sum += v;
+                            return v;
+                        }, () -> new JavaDocDemoAggregator(), (s) -> s.sum))
+                        .build())
+                .build();
+
+        List<JavaDocDemoRecord> data = new ArrayList<>();
+        data.add(new JavaDocDemoRecord("apple", 120.5d));
+        data.add(new JavaDocDemoRecord("banana", 20.119d));
+        data.add(null);
+        data.add(new JavaDocDemoRecord("cherry", 1551d));
+
+        String s = formatter.apply(data);
         System.out.println(s);
 
     }

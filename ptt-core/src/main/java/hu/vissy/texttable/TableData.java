@@ -125,10 +125,11 @@ public final class TableData<D> {
             ci.setWidth(maxWidth);
         }
 
-        // Stores the width information in an unmodifiable list.
+        // Bounds the width with column constraints And stores the width information in an unmodifiable list.
         List<Integer> widths = new ArrayList<>(columns.size());
         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
-            widths.add(columns.get(columnIndex).getWidth());
+            TableData<D>.ColumnInfo ci = columns.get(columnIndex);
+            widths.add(ci.getDefinition().getCellContentFormatter().boundWidth(columns.get(columnIndex).getWidth()));
         }
         this.widths = Collections.unmodifiableList(widths);
     }
@@ -162,7 +163,7 @@ public final class TableData<D> {
 
     /**
      * Checks if a table row is a separator marker or a common data row.
-     * 
+     *
      * @param tr
      *            The row to check.
      * @return True if the row is a separator, false if the row is a common data
