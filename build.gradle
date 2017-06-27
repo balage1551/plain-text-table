@@ -9,7 +9,7 @@ ext.getVersionName = { ->
         standardOutput = stdout
     }
     def res = stdout.toString().trim()
-//    print "res ${res}\n"
+    print "res ${res}\n"
 //    def stdout2 = new ByteArrayOutputStream()
 //    exec {
 //        commandLine 'git', 'log', '--pretty=format:\'%h\'', '-n', '1'
@@ -17,7 +17,7 @@ ext.getVersionName = { ->
 //    }
 //    res = res + '+' + stdout2.toString().replaceAll('\'', '').trim()
 	String[] rp = res.split("-")
-	if (rp.length != 1) {
+	if (rp.length != 1 && rp[1].isNumber()) {
 		res = rp[0]+"-SNAPSHOT+"+rp[1]+"-"+rp[2].substring(1)
 	    def stdout2 = new ByteArrayOutputStream()
 	    exec {
@@ -59,7 +59,7 @@ subprojects {
     }
     
     dependencies {
-        testCompile group: 'org.testng', name: 'testng', version: '6.+'
+        testCompile group: 'org.testng', name: 'testng', version: '[6,6]'
     }
 }
 
