@@ -1,13 +1,31 @@
 package hu.vissy.texttable.dataconverter;
 
+/**
+ * A boolean data converter.
+ *
+ * @author Balage
+ *
+ */
 public class BooleanDataConverter implements DataConverter<Boolean> {
 
     private String trueValue = "" + true;
     private String falseValue = "" + false;
 
+    /**
+     * Constructor for default behaviour: will convert boolean value to their
+     * names.
+     */
     public BooleanDataConverter() {
     }
 
+    /**
+     * Constructor to specify custom strings for false and true values.
+     * 
+     * @param trueValue
+     *            The string to used for true values.
+     * @param falseValue
+     *            The string to used for false values.
+     */
     public BooleanDataConverter(String trueValue, String falseValue) {
         super();
         this.trueValue = trueValue;
@@ -23,5 +41,20 @@ public class BooleanDataConverter implements DataConverter<Boolean> {
 
         return data ? trueValue : falseValue;
     }
+
+    /**
+     * @return The string to used for true values.
+     */
+    public String getTrueValue() {
+        return trueValue;
+    }
+
+    /**
+     * @return The string to used for false values.
+     */
+    public String getFalseValue() {
+        return falseValue;
+    }
+
 
 }

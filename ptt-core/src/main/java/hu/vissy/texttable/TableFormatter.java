@@ -309,7 +309,6 @@ public class TableFormatter<D> {
          * @return The builder instance.
          */
         public Builder<D> withColumn(ColumnDefinition<D, ?, ?> column) {
-            column.setIndex(this.columns.size());
             this.columns.add(column);
             return this;
         }
@@ -376,7 +375,30 @@ public class TableFormatter<D> {
         }
     }
 
-    private List<ColumnDefinition<D, ?, ?>> columns;
+    private class IndexedColumnDefinition<S, T> {
+        private ColumnDefinition<D, S, T> definition;
+        private int index;
+
+        public IndexedColumnDefinition(int index, ColumnDefinition<D, S, T> definition) {
+            super();
+            this.definition = definition;
+            this.index = index;
+        }
+
+        public ColumnDefinition<D, S, T> getDefinition() {
+            return definition;
+        }
+
+        public String getTitle() {
+            return definition.getTitle();
+        }
+
+        public int getIndex() {
+            return index;
+        }
+    }
+
+    private List<IndexedColumnDefinition<?, ?>> columns;
     private BorderFormatter borderFormatter;
     private String heading;
     private boolean showAggregation;
@@ -384,7 +406,8 @@ public class TableFormatter<D> {
 
     private TableFormatter(Builder<D> builder) {
         this.showAggregation = builder.showAggregation;
-        this.columns = builder.columns;
+        this.columns = new ArrayList<>();
+        builder.columns.stream().forEach(cd -> this.columns.add(new IndexedColumnDefinition<>(this.columns.size(), cd)));
         this.borderFormatter = builder.borderFormatter;
         this.heading = builder.heading;
         this.separateDataWithLines = builder.separateDataWithLines;
@@ -418,7 +441,7 @@ public class TableFormatter<D> {
 
         // Printing header
         sb.append(borderFormatter.drawData(columns.stream()
-                .map(cd -> cd.getCellContentFormatter().formatCell(cd.getTitle(), widths.get(cd.getIndex())))
+                .map(cd -> cd.getDefinition().getCellContentFormatter().formatCell(cd.getTitle(), widths.get(cd.getIndex())))
                 .collect(Collectors.toList()), RowType.HEADER));
         sb.append(borderFormatter.drawLine(widths, LineType.HEADER_LINE, false));
 
@@ -433,7 +456,7 @@ public class TableFormatter<D> {
                     sb.append(borderFormatter.drawLine(widths, LineType.INTERNAL_LINE, false));
                 }
                 sb.append(borderFormatter.drawData(columns.stream()
-                        .map(cd -> cd.getCellContentFormatter().formatCell(tr.getValue(cd.getIndex()), widths.get(cd.getIndex())))
+                        .map(cd -> cd.getDefinition().getCellContentFormatter().formatCell(tr.getValue(cd.getIndex()), widths.get(cd.getIndex())))
                         .collect(Collectors.toList()), RowType.DATA));
                 prevSep = false;
             }
@@ -442,7 +465,7 @@ public class TableFormatter<D> {
         if (showAggregation) {
             sb.append(borderFormatter.drawLine(widths, LineType.AGGREGATE_LINE, false));
             sb.append(borderFormatter.drawData(
-                    columns.stream().map(cd -> cd.getCellContentFormatter().formatCell(
+                    columns.stream().map(cd -> cd.getDefinition().getCellContentFormatter().formatCell(
                             td.getAggregateRow().getValue(cd.getIndex()),
                             widths.get(cd.getIndex())))
                             .collect(Collectors.toList()),
@@ -468,7 +491,7 @@ public class TableFormatter<D> {
      * @return The transformed data as an intermediate imutable structure.
      */
     public TableData<D> processData(List<D> data) {
-        TableData<D> td = new TableData<>(columns, data, showAggregation);
+        TableData<D> td = new TableData<>(columns.stream().map(c -> c.getDefinition()).collect(Collectors.toList()), data, showAggregation);
         return td;
     }
 

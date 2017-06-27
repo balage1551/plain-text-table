@@ -18,14 +18,15 @@ import hu.vissy.texttable.contentformatter.CellContentFormatter;
 import hu.vissy.texttable.dataconverter.BooleanDataConverter;
 import hu.vissy.texttable.dataconverter.DateDataConverter;
 import hu.vissy.texttable.dataconverter.DateTimeDataConverter;
-import hu.vissy.texttable.dataconverter.DurationDataConverter;
 import hu.vissy.texttable.dataconverter.NumberDataConverter;
+import hu.vissy.texttable.dataconverter.SimpleDurationDataConverter;
 import hu.vissy.texttable.dataconverter.TimeDataConverter;
 import hu.vissy.texttable.dataextractor.DataExtractor;
 
 public class Tester {
 
     public static void main(String[] args) {
+        new Tester().run();
         new Tester().runJavaDocDemo();
     }
 
@@ -128,7 +129,7 @@ public class Tester {
                             s.s += o.getDuration().getSeconds();
                             return o.getDuration();
                         }, () -> new Sum(), (s) -> Duration.ofSeconds(s.s)))
-                        .withDataConverter(new DurationDataConverter())
+                        .withDataConverter(new SimpleDurationDataConverter())
                         .withCellContentFormatter(
                                 CellContentFormatter.rightAlignedCell())
                         .build())
@@ -150,7 +151,7 @@ public class Tester {
                                 CellContentFormatter.centeredCell())
                         .build())
                 .build();
-        formatter.apply(generate(15));
+        System.out.println(formatter.apply(generate(15)));
     }
 
     private void run2() {
@@ -209,8 +210,8 @@ public class Tester {
         TableFormatter<JavaDocDemoRecord> formatter = new TableFormatter.Builder<JavaDocDemoRecord>()
                 .withHeading("Java doc demo")
                 .withShowAggregation(true)
-                .withSeparateDataWithLines(true)
-                .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.ASCII_LINEDRAW_DOUBLE).build())
+//                .withSeparateDataWithLines(true)
+                .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.UNICODE_LINEDRAW).build())
                 .withColumn(new ColumnDefinition.StatelessBuilder<JavaDocDemoRecord, String>()
                         .withTitle("Fruit")
                         .withAggregateRowConstant("TOTAL")

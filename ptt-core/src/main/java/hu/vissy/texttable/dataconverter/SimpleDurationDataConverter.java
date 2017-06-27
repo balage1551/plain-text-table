@@ -2,9 +2,18 @@ package hu.vissy.texttable.dataconverter;
 
 import java.time.Duration;
 
-public class DurationDataConverter implements DataConverter<Duration> {
+/**
+ * A very simple duration formatter.
+ * <p>
+ * This implementation formats the duration in a hours:minutes:seconds format.
+ * </p>
+ * 
+ * @author Balage
+ *
+ */
+public class SimpleDurationDataConverter implements DataConverter<Duration> {
 
-    public DurationDataConverter() {
+    public SimpleDurationDataConverter() {
     }
 
 

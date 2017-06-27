@@ -30,10 +30,6 @@ group = 'hu.vissy.plain-text-table'
 version = rootProject.version
 //archivesBaseName=rootProject.name+"-"+project.name+"-"+project.version
 
-dependencies { 
-	compile group: 'org.apache.commons', name: 'commons-csv', version: '1.4'
-}
-
 // dependency management as you like
 repositories {
     mavenCentral()
