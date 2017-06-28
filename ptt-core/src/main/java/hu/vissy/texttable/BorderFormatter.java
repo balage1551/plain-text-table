@@ -783,7 +783,7 @@ public class BorderFormatter {
 
 
 
-    public static final DefaultFormatters DEFAULT_TYPE = DefaultFormatters.UNICODE_LINEDRAW;
+    public static final DefaultFormatters DEFAULT_TYPE = DefaultFormatters.ASCII_LINEDRAW_DOUBLE;
 
     private EnumMap<LineType, LineSpec> lineSpecifications = new EnumMap<>(LineType.class);
     private EnumMap<RowType, RowSpec> rowSpecifications = new EnumMap<>(RowType.class);
