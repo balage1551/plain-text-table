@@ -9,6 +9,7 @@ import hu.vissy.texttable.BorderFormatter.LineType;
 import hu.vissy.texttable.BorderFormatter.RowType;
 import hu.vissy.texttable.column.ColumnDefinition;
 import hu.vissy.texttable.contentformatter.CellContentFormatter;
+import hu.vissy.texttable.contentformatter.EllipsisDecorator;
 import hu.vissy.texttable.dataconverter.DataConverter;
 import hu.vissy.texttable.dataconverter.NumberDataConverter;
 import hu.vissy.texttable.dataextractor.DataExtractor;
@@ -208,11 +209,12 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * </p>
  * <p>
  * The second column is a stateful one, because we would like to sum the
- * quantities. Therefore we use the {@linkplain ColumnDefinition.StatefulBuilder} as
- * builder. The title setting is the same, and we use defaults for both data
- * converter ({@linkplain NumberDataConverter#defaultDoubleFormatter()}) and
- * cell formatting ({@linkplain CellContentFormatter#rightAlignedCell()}). The
- * data extractor is a little bit more complex, because we have to provide three
+ * quantities. Therefore we use the
+ * {@linkplain ColumnDefinition.StatefulBuilder} as builder. The title setting
+ * is the same, and we use defaults for both data converter
+ * ({@linkplain NumberDataConverter#defaultDoubleFormatter()}) and cell
+ * formatting ({@linkplain CellContentFormatter#rightAlignedCell()}). The data
+ * extractor is a little bit more complex, because we have to provide three
  * colsures: one for initializing the state class, one for extracting data
  * (which also responsible to update the state class) and one to aquire the
  * state data for the aggregation row.
@@ -431,8 +433,12 @@ public class TableFormatter<D> {
         // Printing heading
         if (heading != null) {
             sb.append(borderFormatter.drawLine(widths, LineType.TOP_EDGE, true));
+            int maxHeadingWidth = borderFormatter.calculateOneColumnWidth(widths);
+            if (heading.length() > maxHeadingWidth) {
+                heading = new EllipsisDecorator.Builder().build().decorate(heading, maxHeadingWidth);
+            }
             sb.append(borderFormatter.drawData(
-                    Collections.singletonList(String.format("%1$-" + borderFormatter.calculateOneColumnWidth(widths) + "s", heading)),
+                    Collections.singletonList(String.format("%1$-" + maxHeadingWidth + "s", heading)),
                     RowType.HEADING));
             sb.append(borderFormatter.drawLine(widths, LineType.HEADING_LINE, false));
         } else {
