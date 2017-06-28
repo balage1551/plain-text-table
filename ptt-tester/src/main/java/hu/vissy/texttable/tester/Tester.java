@@ -21,12 +21,13 @@ import hu.vissy.texttable.dataconverter.DateTimeDataConverter;
 import hu.vissy.texttable.dataconverter.NumberDataConverter;
 import hu.vissy.texttable.dataconverter.SimpleDurationDataConverter;
 import hu.vissy.texttable.dataconverter.TimeDataConverter;
-import hu.vissy.texttable.dataextractor.DataExtractor;
+import hu.vissy.texttable.dataextractor.StatefulDataExtractor;
 
 public class Tester {
 
     public static void main(String[] args) {
         new Tester().run();
+        new Tester().run2();
         new Tester().runJavaDocDemo();
     }
 
@@ -88,11 +89,11 @@ public class Tester {
                         .withDataExtractor(o -> o.getName())
                         .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
                         .build())
-                .withColumn(new ColumnDefinition.Builder<TestObject, Sum, Double>()
+                .withColumn(new ColumnDefinition.StatefulBuilder<TestObject, Sum, Double>()
                         .withTitle("Quantity")
                         .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
                         .withDataConverter(NumberDataConverter.defaultDoubleFormatter())
-                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                        .withDataExtractor(new StatefulDataExtractor<>((o, s) -> {
                             double v = o.getQuantity();
                             s.sum += v;
                             return v;
@@ -123,9 +124,9 @@ public class Tester {
                         .withCellContentFormatter(
                                 CellContentFormatter.centeredCell())
                         .build())
-                .withColumn(new ColumnDefinition.Builder<TestObject, Sum, Duration>()
+                .withColumn(new ColumnDefinition.StatefulBuilder<TestObject, Sum, Duration>()
                         .withTitle("Duration")
-                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                        .withDataExtractor(new StatefulDataExtractor<>((o, s) -> {
                             s.s += o.getDuration().getSeconds();
                             return o.getDuration();
                         }, () -> new Sum(), (s) -> Duration.ofSeconds(s.s)))
@@ -133,9 +134,9 @@ public class Tester {
                         .withCellContentFormatter(
                                 CellContentFormatter.rightAlignedCell())
                         .build())
-                .withColumn(new ColumnDefinition.Builder<TestObject, Sum, Integer>()
+                .withColumn(new ColumnDefinition.StatefulBuilder<TestObject, Sum, Integer>()
                         .withTitle("Length")
-                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                        .withDataExtractor(new StatefulDataExtractor<>((o, s) -> {
                             s.s += o.getLength();
                             return o.getLength();
                         }, () -> new Sum(), (s) -> (int) s.s))
@@ -166,11 +167,11 @@ public class Tester {
                         .withDataExtractor(o -> o.getName())
                         .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
                         .build())
-                .withColumn(new ColumnDefinition.Builder<TestObject, Sum, Double>()
+                .withColumn(new ColumnDefinition.StatefulBuilder<TestObject, Sum, Double>()
                         .withTitle("Column #2")
                         .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
                         .withDataConverter(NumberDataConverter.defaultDoubleFormatter())
-                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                        .withDataExtractor(new StatefulDataExtractor<>((o, s) -> {
                             double v = o.getQuantity();
                             s.sum += v;
                             return v;
@@ -218,11 +219,11 @@ public class Tester {
                         .withDataExtractor(o -> o.getFruit())
                         .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
                         .build())
-                .withColumn(new ColumnDefinition.Builder<JavaDocDemoRecord, JavaDocDemoAggregator, Double>()
+                .withColumn(new ColumnDefinition.StatefulBuilder<JavaDocDemoRecord, JavaDocDemoAggregator, Double>()
                         .withTitle("Quantity")
                         .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
                         .withDataConverter(NumberDataConverter.defaultDoubleFormatter())
-                        .withDataExtractor(new DataExtractor<>((o, s) -> {
+                        .withDataExtractor(new StatefulDataExtractor<>((o, s) -> {
                             double v = o.getQuantity();
                             s.sum += v;
                             return v;

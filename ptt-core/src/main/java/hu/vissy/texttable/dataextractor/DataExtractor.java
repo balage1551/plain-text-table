@@ -5,11 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * The data extractor for stateful columns.
- * <p>
- * The function of data extractor is to retrieve the value of a column from a
- * data record and to maintain state information while doing it.
- * </p>
+ * The common ancestor of the data extractors.
  *
  * @author Balage
  *
@@ -21,7 +17,7 @@ import java.util.function.Supplier;
  * @param <T>
  *            The type of the cell value.
  */
-public class DataExtractor<D, S, T> {
+public abstract class DataExtractor<D, S, T> {
 
     private Supplier<S> stateInitializer = () -> null;
     private BiFunction<D, S, T> rowDataExtractor;

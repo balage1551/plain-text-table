@@ -208,7 +208,7 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
  * </p>
  * <p>
  * The second column is a stateful one, because we would like to sum the
- * quantities. Therefore we use the {@linkplain ColumnDefinition.Builder} as
+ * quantities. Therefore we use the {@linkplain ColumnDefinition.StatefulBuilder} as
  * builder. The title setting is the same, and we use defaults for both data
  * converter ({@linkplain NumberDataConverter#defaultDoubleFormatter()}) and
  * cell formatting ({@linkplain CellContentFormatter#rightAlignedCell()}). The

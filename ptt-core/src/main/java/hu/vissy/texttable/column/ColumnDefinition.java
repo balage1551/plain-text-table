@@ -7,6 +7,7 @@ import hu.vissy.texttable.contentformatter.CellContentFormatter;
 import hu.vissy.texttable.dataconverter.DataConverter;
 import hu.vissy.texttable.dataconverter.TrivialDataConverter;
 import hu.vissy.texttable.dataextractor.DataExtractor;
+import hu.vissy.texttable.dataextractor.StatefulDataExtractor;
 import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
 
 /**
@@ -118,7 +119,7 @@ public class ColumnDefinition<D, S, T> {
     }
 
     /**
-     * A stateful builder.
+     * A builder for stateful columns.
      *
      * @author Balage
      *
@@ -129,7 +130,7 @@ public class ColumnDefinition<D, S, T> {
      * @param <T>
      *            The type of the cell value.
      */
-    public static class Builder<D, S, T> extends BuilderBase<D, S, T, Builder<D, S, T>> {
+    public static class StatefulBuilder<D, S, T> extends BuilderBase<D, S, T, StatefulBuilder<D, S, T>> {
 
         /**
          * Sets the data extractor.
@@ -143,7 +144,7 @@ public class ColumnDefinition<D, S, T> {
          *            The data extractor instance.
          * @return The builder instance.
          */
-        public Builder<D, S, T> withDataExtractor(DataExtractor<D, S, T> dataExtractor) {
+        public StatefulBuilder<D, S, T> withDataExtractor(StatefulDataExtractor<D, S, T> dataExtractor) {
             this.dataExtractor = dataExtractor;
             return this;
         }
