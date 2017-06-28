@@ -201,6 +201,21 @@ public class ColumnDefinition<D, S, T> {
         }
     }
 
+
+    /**
+     * Convenient function for quick prototyping. Creates a simple column using
+     * only defaults.
+     *
+     * @param title
+     *            The title of the column.
+     * @param dataExtractorCallback
+     *            The data extractor closure.
+     * @return The created column definition.
+     */
+    public static <D, T> ColumnDefinition<D, Void, T> createSimpleStateless(String title, Function<D, T> dataExtractorCallback) {
+        return new StatelessBuilder<D, T>().withTitle(title).withDataExtractor(dataExtractorCallback).build();
+    }
+
     private String title;
     private DataExtractor<D, S, T> dataExtractor;
     private DataConverter<T> dataConverter;
