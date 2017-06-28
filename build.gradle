@@ -31,7 +31,7 @@
 //}
 
 group "hu.vissy"
-version "1.0.0-RC2"
+version "1.1.0"
 println "Current version: ${version}"
 
 task printVersion {
