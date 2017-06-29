@@ -18,6 +18,7 @@ import hu.vissy.texttable.column.ColumnDefinition;
  */
 public final class TableData<D> {
 
+
     private class ColumnInfo {
         private ColumnDefinition<D, ?, ?> definition;
         private Object state;
