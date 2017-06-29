@@ -1,34 +1,4 @@
-
-/*
- * Gets the version name from the latest Git tag
- */
-//ext.getVersionName = { ->
-//    def stdout = new ByteArrayOutputStream()
-//    exec {
-//        commandLine 'git', 'describe', '--tags'
-//        standardOutput = stdout
-//    }
-//    def res = stdout.toString().trim()
-//    print "res ${res}\n"
-////    def stdout2 = new ByteArrayOutputStream()
-////    exec {
-////        commandLine 'git', 'log', '--pretty=format:\'%h\'', '-n', '1'
-////        standardOutput = stdout2
-////    }
-////    res = res + '+' + stdout2.toString().replaceAll('\'', '').trim()
-//	String[] rp = res.split("-")
-//	if (rp.length != 1 && rp[1].isNumber()) {
-//		res = rp[0]+"-SNAPSHOT+"+rp[1]+"-"+rp[2].substring(1)
-//	    def stdout2 = new ByteArrayOutputStream()
-//	    exec {
-//	        commandLine 'git', 'log', '-1', '--date=iso-strict', '--pretty=format:%cd'
-//	        standardOutput = stdout2
-//	    }
-//	    res = res + '-' + stdout2.toString().trim().split('\\+')[0].replaceAll('[-+:]','').replaceAll('T','-')
-//				 
-//	}
-//    return res
-//}
+import VersionUtils
 
 group "hu.vissy"
 version "1.1.0"
@@ -36,7 +6,12 @@ println "Current version: ${version}"
 
 task printVersion {
 	doLast {
-		println "Current version: ${version}" 
+        def versionUtils = new VersionUtils()
+        def lv = versionUtils.getLastRelease()
+        def nv = versionUtils.getNewRelease()
+        println "Last version: ${lv}" 
+        println "New version: ${nv}" 
+        versionUtils.pushNewVersion()
 	} 
 }
 
@@ -59,7 +34,7 @@ subprojects {
     }
     
     dependencies {
-        testCompile group: 'org.testng', name: 'testng', version: '[6,6]'
+        testCompile group: 'org.testng', name: 'testng', version: '[6.0,7.0)'
     }
 }
 
