@@ -782,8 +782,11 @@ public class BorderFormatter {
     }
 
 
+    public static BorderFormatter fromPreset(DefaultFormatters preset) {
+        return new BorderFormatter.Builder(preset).build();
+    }
 
-    public static final DefaultFormatters DEFAULT_TYPE = DefaultFormatters.ASCII_LINEDRAW_DOUBLE;
+    public static final DefaultFormatters DEFAULT_TYPE = DefaultFormatters.ASCII_LINEDRAW;
 
     private EnumMap<LineType, LineSpec> lineSpecifications = new EnumMap<>(LineType.class);
     private EnumMap<RowType, RowSpec> rowSpecifications = new EnumMap<>(RowType.class);
