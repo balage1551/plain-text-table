@@ -216,6 +216,27 @@ public class ColumnDefinition<D, S, T> {
         return new StatelessBuilder<D, T>().withTitle(title).withDataExtractor(dataExtractorCallback).build();
     }
 
+    /**
+     * Convenient function for quick prototyping. Creates a simple column using
+     * only defaults, but with given alignment.
+     *
+     * @param title
+     *            The title of the column.
+     * @param cellFormatter
+     *            Cell formatter.
+     * @param dataExtractorCallback
+     *            The data extractor closure.
+     * @return The created column definition.
+     */
+    public static <D, T> ColumnDefinition<D, Void, T> createSimpleStateless(String title, CellContentFormatter cellFormatter,
+            Function<D, T> dataExtractorCallback) {
+        return new StatelessBuilder<D, T>()
+                .withTitle(title)
+                .withCellContentFormatter(cellFormatter)
+                .withDataExtractor(dataExtractorCallback)
+                .build();
+    }
+
     private String title;
     private DataExtractor<D, S, T> dataExtractor;
     private DataConverter<T> dataConverter;
