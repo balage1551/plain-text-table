@@ -2,7 +2,6 @@ import VersionUtils
 
 group "hu.vissy"
 version "1.1.0"
-println "Current version: ${version}"
 
 task printVersion {
 	doLast {
@@ -37,4 +36,6 @@ subprojects {
         testCompile group: 'org.testng', name: 'testng', version: '[6.0,7.0)'
     }
 }
+
+
 

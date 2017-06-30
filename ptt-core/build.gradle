@@ -103,3 +103,39 @@ uploadArchives {
     }
 }
 
+
+task uploadTest(dependsOn: assemble) {
+    
+    finalizedBy 'updateGitIfReleaseSuccessful'
+    
+    gradle.taskGraph.whenReady {
+        if (gradle.taskGraph.hasTask(":${project.name}:uploadTest")) {
+            rootProject.ext.versionUtils = new VersionUtils()
+            ext.lv = rootProject.versionUtils.getLastRelease()
+            ext.nv = rootProject.versionUtils.getNewRelease()
+            rootProject.version=nv.toVersionSequence()
+            project.version=nv.toVersionSequence()
+            
+            println "Last version: ${lv.toVersionSequence()}" 
+            println "New version: ${nv.toVersionSequence()}" 
+        } else {
+        }
+    }
+    
+    doLast {
+        println "Version: ${project.version}"
+        rootProject.versionUtils.simulateUpload()
+    }
+}
+
+task updateGitIfReleaseSuccessful {
+    onlyIf {
+        uploadTest.state.failure == null
+    }
+    
+    doLast {
+        println "Git updated to version: ${rootProject.version}"
+        def v = rootProject.versionUtils.getNewRelease()
+        println "Doing: ${v}"
+    }
+}
