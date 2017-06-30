@@ -111,9 +111,9 @@ public class VersionUtils {
         if (!output.get(0).contains("On branch master")) {
             throw new IllegalStateException("Not on master branch.");
         }
-//        if (!wholeOutput.contains("nothing to commit")) {
-//            throw new IllegalStateException("Local repo is dirty (there are uncommited changes).");
-//        }
+        if (!wholeOutput.contains("nothing to commit")) {
+            throw new IllegalStateException("Local repo is dirty (there are uncommited changes).");
+        }
 
         if (wholeOutput.contains("branch is behind")) {
             throw new IllegalStateException("Local branch is behind remote.");

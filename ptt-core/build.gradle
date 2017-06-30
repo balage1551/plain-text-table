@@ -4,22 +4,6 @@ apply plugin: "maven"
 apply plugin: "signing"
 apply plugin: 'checkstyle'
 
-//
-//uploadArchives {
-//    repositories {
-//        add project.repositories.fileRepo
-//    }
-//}
-//
-//
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            from components.java
-//        }
-//    }
-//}
-
 
 checkstyle {
    toolVersion ="7.8.2"
@@ -101,6 +85,25 @@ uploadArchives {
             }
         }
     }
+    
+    uploadArchives.finalizedBy 'updateGitIfReleaseSuccessful'
+
+    gradle.taskGraph.whenReady {
+        if (gradle.taskGraph.hasTask(":${project.name}:uploadTest")) {
+            rootProject.ext.versionUtils = new VersionUtils()
+            rootProject.versionUtils.validateGitState()
+            ext.lv = rootProject.versionUtils.getLastRelease()
+            ext.nv = rootProject.versionUtils.getNewRelease()
+            rootProject.version=nv.toVersionSequence()
+            project.version=nv.toVersionSequence()
+            
+            println "Last version: ${lv.toVersionSequence()}"
+            println "New version: ${nv.toVersionSequence()}"
+            rootProject.versionUtils.updateChangeLog()
+        } else {
+        }
+    }
+
 }
 
 
@@ -119,6 +122,7 @@ task uploadTest(dependsOn: assemble) {
             
             println "Last version: ${lv.toVersionSequence()}" 
             println "New version: ${nv.toVersionSequence()}" 
+            rootProject.versionUtils.updateChangeLog()
         } else {
         }
     }
@@ -137,7 +141,6 @@ task updateGitIfReleaseSuccessful {
     doLast {
         println "Updating git to version: ${rootProject.version}"
         def v = rootProject.versionUtils.getNewRelease()
-        rootProject.versionUtils.updateChangeLog()
         rootProject.versionUtils.updateRepository()
     }
 }
