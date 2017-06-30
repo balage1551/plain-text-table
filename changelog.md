@@ -2,6 +2,12 @@
 
 ## Change log
 
+### Version 1.3.1 (2017-06-30 12:18:49.857)
+
+#### Bugfixes
+
+- minimal bugfixes in build script
+
 ### Version 1.3.0 (2017-06-30 12:10:17.023)
 
 #### New features
