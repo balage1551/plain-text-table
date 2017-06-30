@@ -112,6 +112,9 @@ public class VersionUtils {
         }
     }
 
+    public void updateChangeLog() {
+
+    }
 
     public Version getLastRelease() {
         return lastRelease;
