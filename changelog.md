@@ -2,7 +2,7 @@
 
 ## Change log
 
-### Version 1.3.0
+### Version 1.3.0(2017-06-30 12:10:17.023)
 
 #### New features
 
