@@ -138,5 +138,6 @@ task updateGitIfReleaseSuccessful {
         println "Git updated to version: ${rootProject.version}"
         def v = rootProject.versionUtils.getNewRelease()
         println "Doing: ${v}"
+        rootProject.versionUtils.updateChangeLog() 
     }
 }

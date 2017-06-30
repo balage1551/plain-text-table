@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,9 +106,9 @@ public class VersionUtils {
         if (!output.get(0).contains("On branch master")) {
             throw new IllegalStateException("Not on master branch.");
         }
-        if (!wholeOutput.contains("nothing to commit")) {
-            throw new IllegalStateException("Local repo is dirty (there are uncommited changes).");
-        }
+//        if (!wholeOutput.contains("nothing to commit")) {
+//            throw new IllegalStateException("Local repo is dirty (there are uncommited changes).");
+//        }
 
         if (wholeOutput.contains("branch is behind")) {
             throw new IllegalStateException("Local branch is behind remote.");
@@ -113,7 +116,36 @@ public class VersionUtils {
     }
 
     public void updateChangeLog() {
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("changelog.md"), StandardCharsets.UTF_8);
+            int ip = 0;
+            while (ip < lines.size()) {
+                if (lines.get(ip).trim().startsWith("###")) {
+                    break;
+                }
+                ip++;
+            }
+            lines.add(ip++, "### Version " + newRelease.toVersionSequence());
+            lines.add(ip++, "");
+            ip = addToLog(lines, ip, newFeatures, "New features");
+            ip = addToLog(lines, ip, bugfixes, "Bugfixes");
+            ip = addToLog(lines, ip, backwardIncompabilities, "Backward incompabilities");
+            System.out.println(lines.stream().collect(Collectors.joining("\n")));
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
+    private int addToLog(List<String> lines, int ip, List<String> data, String title) {
+        if (!data.isEmpty()) {
+            lines.add(ip++, "#### " + title);
+            lines.add(ip++, "");
+            for (String en : data) {
+                lines.add(ip++, "- " + en.trim());
+            }
+            lines.add(ip++, "");
+        }
+        return ip;
     }
 
     public Version getLastRelease() {
@@ -165,7 +197,7 @@ public class VersionUtils {
     }
 
     public void simulateUpload() {
-        if (Math.random() < 0.5) {
+        if (Math.random() > 10.5) {
             throw new RuntimeException();
         }
     }
