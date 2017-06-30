@@ -29,6 +29,10 @@ PTT follows a concept to allow easy user data to table conversion for any possib
 
 - Handle cell spans either horizontal (column span) or vertical (row span).
 
+## Changelog
+
+You can find the version history and change log in [changelog.md](changelog.md).
+
 ## Roadmap
 
 These are the planned features for the next releases:
@@ -302,4 +306,4 @@ Make one more run: if we have a unicode output, let's switch to the preset `Defa
 
 *(Note: the break of the lines is due to the line spacing if Markdown)*
 
-This demostration is only showed the basics of the framework. For more detailed guide see TODO.
+This demostration is only showed the basics of the framework. For more detailed guide see [Ptt Gide](doc/index.md).
