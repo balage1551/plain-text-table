@@ -88,44 +88,34 @@ uploadArchives {
     
     uploadArchives.finalizedBy 'updateGitIfReleaseSuccessful'
 
-    gradle.taskGraph.whenReady {
-        if (gradle.taskGraph.hasTask(":${project.name}:uploadTest")) {
-            rootProject.ext.versionUtils = new VersionUtils()
-            rootProject.versionUtils.validateGitState()
-            ext.lv = rootProject.versionUtils.getLastRelease()
-            ext.nv = rootProject.versionUtils.getNewRelease()
-            rootProject.version=nv.toVersionSequence()
-            project.version=nv.toVersionSequence()
-            
-            println "Last version: ${lv.toVersionSequence()}"
-            println "New version: ${nv.toVersionSequence()}"
-            rootProject.versionUtils.updateChangeLog()
-        } else {
-        }
+    uploadArchives.doFirst {
+        logger.quiet("Uploading archives to version: ${project.version}")
     }
+}
 
+
+
+gradle.taskGraph.whenReady {
+    if (gradle.taskGraph.hasTask(":${project.name}:uploadArchives") || 
+        gradle.taskGraph.hasTask(":${project.name}:uploadTest")) {
+        rootProject.ext.versionUtils = new VersionUtils()
+        rootProject.versionUtils.validateGitState()
+        ext.lv = rootProject.versionUtils.getLastRelease()
+        ext.nv = rootProject.versionUtils.getNewRelease()
+        rootProject.version=nv.toVersionSequence()
+        project.version=nv.toVersionSequence()
+        
+        println "Last version: ${lv.toVersionSequence()}"
+        println "New version: ${nv.toVersionSequence()}"
+        rootProject.versionUtils.updateChangeLog()
+    } else {
+    }
 }
 
 
 task uploadTest(dependsOn: assemble) {
     
     finalizedBy 'updateGitIfReleaseSuccessful'
-    
-    gradle.taskGraph.whenReady {
-        if (gradle.taskGraph.hasTask(":${project.name}:uploadTest")) {
-            rootProject.ext.versionUtils = new VersionUtils()
-            rootProject.versionUtils.validateGitState()
-            ext.lv = rootProject.versionUtils.getLastRelease()
-            ext.nv = rootProject.versionUtils.getNewRelease()
-            rootProject.version=nv.toVersionSequence()
-            project.version=nv.toVersionSequence()
-            
-            println "Last version: ${lv.toVersionSequence()}" 
-            println "New version: ${nv.toVersionSequence()}" 
-            rootProject.versionUtils.updateChangeLog()
-        } else {
-        }
-    }
     
     doLast {
         println "Version: ${project.version}"
