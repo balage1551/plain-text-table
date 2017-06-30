@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,22 +73,24 @@ public class VersionUtils {
         String lastReleaseHash = output.get(0);
         System.out.println("Last realese hash: " + lastReleaseHash);
 
-        output = runExternalCommand("git", "log", "--pretty=oneline", lastReleaseHash + "...");
+        output = runExternalCommand("git", "log", "--pretty=\"%B\"", lastReleaseHash + "...");
         output.forEach(ol -> {
-            String comment = ol.substring(ol.indexOf(' ') + 1).trim();
-            switch (comment.charAt(0)) {
-            case '+':
-                newFeatures.add(comment.substring(1).trim());
-                break;
-            case '%':
-                bugfixes.add(comment.substring(1).trim());
-                break;
-            case '!':
-                backwardIncompabilities.add(comment.substring(1).trim());
-                break;
+            String comment = ol.trim();
+            if (!comment.isEmpty()) {
+                switch (comment.charAt(0)) {
+                case '+':
+                    newFeatures.add(0, comment.substring(1).trim());
+                    break;
+                case '%':
+                    bugfixes.add(0, comment.substring(1).trim());
+                    break;
+                case '!':
+                    backwardIncompabilities.add(0, comment.substring(1).trim());
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+                }
             }
         });
 
@@ -120,20 +123,33 @@ public class VersionUtils {
             List<String> lines = Files.readAllLines(Paths.get("changelog.md"), StandardCharsets.UTF_8);
             int ip = 0;
             while (ip < lines.size()) {
-                if (lines.get(ip).trim().startsWith("###")) {
+                if (lines.get(ip).trim().startsWith("### ")) {
                     break;
                 }
                 ip++;
             }
+            if (lines.get(ip).contains(newRelease.toVersionSequence())) {
+                do {
+                    lines.remove(ip);
+                } while (!lines.get(ip).trim().startsWith("### "));
+            }
+
             lines.add(ip++, "### Version " + newRelease.toVersionSequence());
             lines.add(ip++, "");
             ip = addToLog(lines, ip, newFeatures, "New features");
             ip = addToLog(lines, ip, bugfixes, "Bugfixes");
             ip = addToLog(lines, ip, backwardIncompabilities, "Backward incompabilities");
-            System.out.println(lines.stream().collect(Collectors.joining("\n")));
+            Files.write(Paths.get("changelog.md"), lines, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public void updateRepository() {
+        runExternalCommand("git", "add", ".");
+        runExternalCommand("git", "commit", "-m", "releasing version " + newRelease.toVersionSequence() + "");
+        runExternalCommand("git", "tag", "-a", newRelease.toString(), "-m", "Version " + newRelease.toVersionSequence() + " is released.");
+        runExternalCommand("git", "push", "origin", "master", newRelease.toString());
     }
 
     private int addToLog(List<String> lines, int ip, List<String> data, String title) {
