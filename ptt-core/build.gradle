@@ -105,8 +105,8 @@ gradle.taskGraph.whenReady {
         rootProject.version=nv.toVersionSequence()
         project.version=nv.toVersionSequence()
         
-        println "Last version: ${lv.toVersionSequence()}"
-        println "New version: ${nv.toVersionSequence()}"
+        logger.quiet("Last version: ${lv.toVersionSequence()}")
+        logger.quiet("New version: ${nv.toVersionSequence()}")
         rootProject.versionUtils.updateChangeLog()
     } else {
     }
@@ -118,7 +118,7 @@ task uploadTest(dependsOn: assemble) {
     finalizedBy 'updateGitIfReleaseSuccessful'
     
     doLast {
-        println "Version: ${project.version}"
+        logger.info("Version: ${project.version}")
         rootProject.versionUtils.simulateUpload()
     }
 }
@@ -129,7 +129,7 @@ task updateGitIfReleaseSuccessful {
     }
     
     doLast {
-        println "Updating git to version: ${rootProject.version}"
+        logger.lifecycle("Updating git to version: ${rootProject.version}")
         def v = rootProject.versionUtils.getNewRelease()
         rootProject.versionUtils.updateRepository()
     }

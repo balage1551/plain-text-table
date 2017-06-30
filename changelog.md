@@ -2,21 +2,12 @@
 
 ## Change log
 
-### Version 1.3.0(2017-06-30 12:10:17.023)
+### Version 1.3.0 (2017-06-30 12:10:17.023)
 
 #### New features
 
 - BorderFormatter.fromPreset shortcut function added
 - ColumnDefinition.createSimpleStateless function overload with alignment
-- a multi line feature
-- third line
-- one line
-
-#### Bugfixes
-
-- a theoritical bugfix
-- another bug fixed
-- another line
 
 ### Version 1.2.0
 

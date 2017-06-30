@@ -73,7 +73,7 @@ public class VersionUtils {
 
         output = runExternalCommand("git", "rev-parse", "--verify", lastRelease.toString());
         String lastReleaseHash = output.get(0);
-        System.out.println("Last realese hash: " + lastReleaseHash);
+//        System.out.println("Last realese hash: " + lastReleaseHash);
 
         output = runExternalCommand("git", "log", "--pretty=\"%B\"", lastReleaseHash + "...");
         output.forEach(ol -> {
@@ -96,9 +96,12 @@ public class VersionUtils {
             }
         });
 
-        System.out.println("New features:\n" + newFeatures.stream().collect(Collectors.joining("\n   ", "   ", "\n")));
-        System.out.println("Bugfixes:\n" + bugfixes.stream().collect(Collectors.joining("\n   ", "   ", "\n")));
-        System.out.println("Backward incompabilities:\n" + backwardIncompabilities.stream().collect(Collectors.joining("\n   ", "   ", "\n")));
+        System.out.println(String.format("Release statistics: %d incompatibilities, %d new features, %d bugfixes",
+                backwardIncompabilities.size(), newFeatures.size(), bugfixes.size()));
+
+//        System.out.println("New features:\n" + newFeatures.stream().collect(Collectors.joining("\n   ", "   ", "\n")));
+//        System.out.println("Bugfixes:\n" + bugfixes.stream().collect(Collectors.joining("\n   ", "   ", "\n")));
+//        System.out.println("Backward incompabilities:\n" + backwardIncompabilities.stream().collect(Collectors.joining("\n   ", "   ", "\n")));
 
         newRelease = createNewRelease();
     }
@@ -136,7 +139,7 @@ public class VersionUtils {
                 } while (!lines.get(ip).trim().startsWith("### "));
             }
 
-            lines.add(ip++, "### Version " + newRelease.toVersionSequence() + "(" +
+            lines.add(ip++, "### Version " + newRelease.toVersionSequence() + " (" +
                     DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replaceAll("T", " ") + ")");
             lines.add(ip++, "");
             ip = addToLog(lines, ip, newFeatures, "New features");
