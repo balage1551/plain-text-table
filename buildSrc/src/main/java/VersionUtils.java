@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -134,7 +136,8 @@ public class VersionUtils {
                 } while (!lines.get(ip).trim().startsWith("### "));
             }
 
-            lines.add(ip++, "### Version " + newRelease.toVersionSequence());
+            lines.add(ip++, "### Version " + newRelease.toVersionSequence() + "(" +
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()).replaceAll("T", " ") + ")");
             lines.add(ip++, "");
             ip = addToLog(lines, ip, newFeatures, "New features");
             ip = addToLog(lines, ip, bugfixes, "Bugfixes");
