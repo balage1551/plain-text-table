@@ -111,6 +111,7 @@ task uploadTest(dependsOn: assemble) {
     gradle.taskGraph.whenReady {
         if (gradle.taskGraph.hasTask(":${project.name}:uploadTest")) {
             rootProject.ext.versionUtils = new VersionUtils()
+            rootProject.versionUtils.validateGitState()
             ext.lv = rootProject.versionUtils.getLastRelease()
             ext.nv = rootProject.versionUtils.getNewRelease()
             rootProject.version=nv.toVersionSequence()

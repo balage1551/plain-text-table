@@ -95,6 +95,23 @@ public class VersionUtils {
         newRelease = createNewRelease();
     }
 
+    public void validateGitState() {
+        List<String> output;
+        runExternalCommand("git", "remote", "origin");
+        output = runExternalCommand("git", "status", "-uno");
+        String wholeOutput = output.stream().collect(Collectors.joining("\n"));
+        if (!output.get(0).contains("On branch master")) {
+            throw new IllegalStateException("Not on master branch.");
+        }
+        if (!wholeOutput.contains("nothing to commit")) {
+            throw new IllegalStateException("Local repo is dirty (there are uncommited changes).");
+        }
+
+        if (wholeOutput.contains("branch is behind")) {
+            throw new IllegalStateException("Local branch is behind remote.");
+        }
+    }
+
 
     public Version getLastRelease() {
         return lastRelease;
