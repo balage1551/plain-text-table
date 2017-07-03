@@ -113,7 +113,11 @@ public final class TableData<D> {
             int maxWidth = ci.getDefinition().getTitle().length();
             for (TableRow r : rows) {
                 if (r != separator) {
-                    int w = r.getValue(columnIndex).length();
+                    String value = r.getValue(columnIndex);
+                    if (value == null) {
+                        value = ci.getDefinition().getCellContentFormatter().getNullValue();
+                    }
+                    int w = value.length();
                     if (w > maxWidth) {
                         maxWidth = w;
                     }
