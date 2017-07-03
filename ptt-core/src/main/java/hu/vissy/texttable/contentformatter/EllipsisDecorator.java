@@ -97,8 +97,8 @@ public class EllipsisDecorator {
          * @return The builder instance.
          */
         public Builder withEllipsisSign(String ellipsisSign) {
-            if (ellipsisSign == null || ellipsisSign.isEmpty()) {
-                throw new IllegalArgumentException("Ellipses sign can't be empty or null.");
+            if (ellipsisSign == null) {
+                throw new IllegalArgumentException("Ellipses sign can't be null.");
             }
             this.ellipsisSign = ellipsisSign;
             return this;
