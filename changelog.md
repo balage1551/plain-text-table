@@ -2,6 +2,14 @@
 
 ## Change log
 
+### Version 1.3.2 (2017-07-03 15:28:51.251)
+
+#### Bugfixes
+
+- NPE on column width calculation is fixed
+- Empty elipsis sign is now allowed
+- TrivialDataConverter is now returns null for nulls, instead of empty string for consistency
+
 ### Version 1.3.1 (2017-06-30 12:18:49.857)
 
 #### Bugfixes
