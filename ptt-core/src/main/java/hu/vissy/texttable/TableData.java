@@ -56,15 +56,13 @@ public final class TableData<D> {
     private List<TableRow> rows = new ArrayList<>();
     private TableRow separator = new TableRow(0);
     private TableRow aggregateRow;
-    private boolean calculateAggregation;
     private List<Integer> widths;
 
 
-    TableData(List<ColumnDefinition<D, ?, ?>> columns, List<D> data, boolean calculateAggregation) {
+    TableData(List<D> data, TableFormatter<D> tableFormatter) {
         super();
-        this.calculateAggregation = calculateAggregation;
-        columns.stream().forEach(c -> this.columns.add(new ColumnInfo(c)));
-        populate(data);
+        tableFormatter.getColumns().stream().forEach(c -> this.columns.add(new ColumnInfo(c.getDefinition())));
+        populate(data, tableFormatter);
     }
 
     /**
@@ -74,7 +72,7 @@ public final class TableData<D> {
         return columns.size();
     }
 
-    private void populate(List<D> data) {
+    private void populate(List<D> data, TableFormatter<D> tableFormatter) {
         // Initialize the state objects
         columns.forEach(ci -> ci.initializeState());
 
@@ -96,7 +94,7 @@ public final class TableData<D> {
         }
 
         // Calculates the aggregated values
-        if (calculateAggregation) {
+        if (tableFormatter.isShowAggregation()) {
             aggregateRow = new TableRow(getColumnCount());
             for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
                 TableData<D>.ColumnInfo ci = columns.get(columnIndex);
@@ -110,7 +108,7 @@ public final class TableData<D> {
         // Calculates the column widths
         for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
             TableData<D>.ColumnInfo ci = columns.get(columnIndex);
-            int maxWidth = ci.getDefinition().getTitle().length();
+            int maxWidth = tableFormatter.getHeaderConverter().convert(ci.getDefinition().getTitle()).length();
             for (TableRow r : rows) {
                 if (r != separator) {
                     String value = r.getValue(columnIndex);
@@ -123,7 +121,7 @@ public final class TableData<D> {
                     }
                 }
             }
-            if (calculateAggregation) {
+            if (tableFormatter.isShowAggregation()) {
                 maxWidth = Math.max(maxWidth, aggregateRow.getValue(columnIndex) == null ? 0 : aggregateRow.getValue(columnIndex).length());
             }
 

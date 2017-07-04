@@ -12,6 +12,7 @@ import hu.vissy.texttable.contentformatter.CellContentFormatter;
 import hu.vissy.texttable.contentformatter.EllipsisDecorator;
 import hu.vissy.texttable.dataconverter.DataConverter;
 import hu.vissy.texttable.dataconverter.NumberDataConverter;
+import hu.vissy.texttable.dataconverter.StringDataConverter;
 import hu.vissy.texttable.dataextractor.DataExtractor;
 import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
 
@@ -294,6 +295,7 @@ public class TableFormatter<D> {
         private String heading = null;
         private boolean showAggregation = false;
         private boolean separateDataWithLines = false;
+        private DataConverter<String> headerConverter = new StringDataConverter();
 
         /**
          * The constructor of the builder.
@@ -369,6 +371,20 @@ public class TableFormatter<D> {
             return this;
         }
 
+
+
+        /**
+         * Defines alternative data converter for header column.
+         *
+         * @param headerConverter
+         *            The new header converter.
+         * @return The builder instance.
+         */
+        public Builder<D> withHeaderConverter(DataConverter<String> headerConverter) {
+            this.headerConverter = headerConverter;
+            return this;
+        }
+
         /**
          * @return The created {@linkplain TableFormatter} istance.
          */
@@ -377,7 +393,7 @@ public class TableFormatter<D> {
         }
     }
 
-    private class IndexedColumnDefinition<S, T> {
+    class IndexedColumnDefinition<S, T> {
         private ColumnDefinition<D, S, T> definition;
         private int index;
 
@@ -405,14 +421,17 @@ public class TableFormatter<D> {
     private String heading;
     private boolean showAggregation;
     private boolean separateDataWithLines;
+    private DataConverter<String> headerConverter;
 
     private TableFormatter(Builder<D> builder) {
         this.showAggregation = builder.showAggregation;
-        this.columns = new ArrayList<>();
-        builder.columns.stream().forEach(cd -> this.columns.add(new IndexedColumnDefinition<>(this.columns.size(), cd)));
+        List<IndexedColumnDefinition<?, ?>> cols = new ArrayList<>();
+        builder.columns.stream().forEach(cd -> cols.add(new IndexedColumnDefinition<>(cols.size(), cd)));
+        this.columns = Collections.unmodifiableList(cols);
         this.borderFormatter = builder.borderFormatter;
         this.heading = builder.heading;
         this.separateDataWithLines = builder.separateDataWithLines;
+        this.headerConverter = builder.headerConverter;
     }
 
 
@@ -447,7 +466,8 @@ public class TableFormatter<D> {
 
         // Printing header
         sb.append(borderFormatter.drawData(columns.stream()
-                .map(cd -> cd.getDefinition().getCellContentFormatter().formatCell(cd.getTitle(), widths.get(cd.getIndex())))
+                .map(cd -> cd.getDefinition().getCellContentFormatter()
+                        .formatCell(headerConverter.convert(cd.getTitle()), widths.get(cd.getIndex())))
                 .collect(Collectors.toList()), RowType.HEADER));
         sb.append(borderFormatter.drawLine(widths, LineType.HEADER_LINE, false));
 
@@ -497,8 +517,57 @@ public class TableFormatter<D> {
      * @return The transformed data as an intermediate imutable structure.
      */
     public TableData<D> processData(List<D> data) {
-        TableData<D> td = new TableData<>(columns.stream().map(c -> c.getDefinition()).collect(Collectors.toList()), data, showAggregation);
+        TableData<D> td = new TableData<>(data, this);
         return td;
     }
+
+
+    /**
+     * @return The unmodifiable list of columns
+     */
+    public List<IndexedColumnDefinition<?, ?>> getColumns() {
+        return columns;
+    }
+
+
+    /**
+     * @return The border formatter
+     */
+    public BorderFormatter getBorderFormatter() {
+        return borderFormatter;
+    }
+
+
+    /**
+     * @return The heading text
+     */
+    public String getHeading() {
+        return heading;
+    }
+
+
+    /**
+     * @return Whether to print aggregation row
+     */
+    public boolean isShowAggregation() {
+        return showAggregation;
+    }
+
+
+    /**
+     * @return Whether to print lines between data rows
+     */
+    public boolean isSeparateDataWithLines() {
+        return separateDataWithLines;
+    }
+
+
+    /**
+     * @return The header converter
+     */
+    public DataConverter<String> getHeaderConverter() {
+        return headerConverter;
+    }
+
 
 }
