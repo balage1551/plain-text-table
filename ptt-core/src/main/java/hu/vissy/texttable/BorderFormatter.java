@@ -356,6 +356,27 @@ public class BorderFormatter {
      *
      */
     public enum DefaultFormatters {
+
+        /**
+         * A table definition with no padding and no separators, edges.
+         *
+         * @author Balage
+         *
+         */
+        EMPTY {
+            @Override
+            void populate(BorderFormatter.Builder bfb) {
+                for (LineType t : LineType.values()) {
+                    bfb.lineSpecifications.put(t, HIDDEN);
+                }
+                for (RowType t : RowType.values()) {
+                    bfb.rowSpecifications.put(t, new RowSpec('\0', '\0', '\0'));
+                }
+                bfb.withDrawVerticalEdge(false).withPaddingWidth(0).withDrawVerticalSeparator(false);
+            }
+        },
+
+
         /**
          * A table definition based on the Unicode line draw characters.
          * (https://en.wikipedia.org/wiki/Box-drawing_character)
