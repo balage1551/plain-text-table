@@ -26,9 +26,12 @@ import hu.vissy.texttable.dataextractor.StatefulDataExtractor;
 public class Tester {
 
     public static void main(String[] args) {
-        new Tester().run();
+        new Tester().run(true, true);
         new Tester().run2();
         new Tester().runJavaDocDemo();
+        new Tester().run(false, true);
+        new Tester().run(true, false);
+        new Tester().run(false, false);
     }
 
     private static final String[] FRUITS = new String[] { "apple", "banana", "cherry", "date",
@@ -38,7 +41,7 @@ public class Tester {
         Random r = new Random(150);
         return IntStream.range(0, count)
                 .mapToObj(i -> {
-                    if (i == 1 || i == 11) {
+                    if (i == 2 || i == 11) {
                         return null;
                     } else {
                         return new TestObject(i, FRUITS[r.nextInt(FRUITS.length)],
@@ -77,9 +80,10 @@ public class Tester {
         long s = 0;
     }
 
-    private void run() {
+    private void run(boolean showHeader, boolean showHeading) {
         TableFormatter<TestObject> formatter = new TableFormatter.Builder<TestObject>()
-                .withHeading("Alma")
+                .withHeading(showHeading ? "Fruit list" : null)
+                .withShowHeader(showHeader)
                 .withShowAggregation(true)
                 .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.UNICODE_LINEDRAW).withPaddingWidth(1).build())
                 .withSeparateDataWithLines(true)

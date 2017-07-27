@@ -296,6 +296,7 @@ public class TableFormatter<D> {
         private boolean showAggregation = false;
         private boolean separateDataWithLines = false;
         private DataConverter<String> headerConverter = new StringDataConverter();
+        private boolean showHeader = true;
 
         /**
          * The constructor of the builder.
@@ -353,6 +354,19 @@ public class TableFormatter<D> {
          */
         public Builder<D> withShowAggregation(boolean showAggregation) {
             this.showAggregation = showAggregation;
+            return this;
+        }
+
+        /**
+         * Speficies whether to show header row.
+         *
+         * @param showHeader
+         *            If true, a header line will be displayed. If false, thew
+         *            header line will be hidden. Default is true.
+         * @return The builder instance.
+         */
+        public Builder<D> withShowHeader(boolean showHeader) {
+            this.showHeader = showHeader;
             return this;
         }
 
@@ -421,6 +435,7 @@ public class TableFormatter<D> {
     private String heading;
     private boolean showAggregation;
     private boolean separateDataWithLines;
+    private boolean showHeader;
     private DataConverter<String> headerConverter;
 
     private TableFormatter(Builder<D> builder) {
@@ -430,6 +445,7 @@ public class TableFormatter<D> {
         this.columns = Collections.unmodifiableList(cols);
         this.borderFormatter = builder.borderFormatter;
         this.heading = builder.heading;
+        this.showHeader = builder.showHeader;
         this.separateDataWithLines = builder.separateDataWithLines;
         this.headerConverter = builder.headerConverter;
     }
@@ -465,11 +481,13 @@ public class TableFormatter<D> {
         }
 
         // Printing header
-        sb.append(borderFormatter.drawData(columns.stream()
-                .map(cd -> cd.getDefinition().getCellContentFormatter()
-                        .formatCell(headerConverter.convert(cd.getTitle()), widths.get(cd.getIndex())))
-                .collect(Collectors.toList()), RowType.HEADER));
-        sb.append(borderFormatter.drawLine(widths, LineType.HEADER_LINE, false));
+        if (showHeader) {
+            sb.append(borderFormatter.drawData(columns.stream()
+                    .map(cd -> cd.getDefinition().getCellContentFormatter()
+                            .formatCell(headerConverter.convert(cd.getTitle()), widths.get(cd.getIndex())))
+                    .collect(Collectors.toList()), RowType.HEADER));
+            sb.append(borderFormatter.drawLine(widths, LineType.HEADER_LINE, false));
+        }
 
         // Printing data rows
         boolean prevSep = true;
@@ -551,6 +569,14 @@ public class TableFormatter<D> {
      */
     public boolean isShowAggregation() {
         return showAggregation;
+    }
+
+
+    /**
+     * @return Whether to print header row
+     */
+    public boolean isShowHeader() {
+        return showHeader;
     }
 
 
