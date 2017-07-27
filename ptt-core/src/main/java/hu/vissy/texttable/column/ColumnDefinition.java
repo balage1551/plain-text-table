@@ -236,6 +236,10 @@ public class ColumnDefinition<D, S, T> {
      *            The title of the column.
      * @param dataExtractorCallback
      *            The data extractor closure.
+     * @param <D>
+     *            The type of the input record.
+     * @param <T>
+     *            The type of the cell value.
      * @return The created column definition.
      */
     public static <D, T> ColumnDefinition<D, Void, T> createSimpleStateless(String title, Function<D, T> dataExtractorCallback) {
@@ -252,6 +256,10 @@ public class ColumnDefinition<D, S, T> {
      *            Cell formatter.
      * @param dataExtractorCallback
      *            The data extractor closure.
+     * @param <D>
+     *            The type of the input record.
+     * @param <T>
+     *            The type of the cell value.
      * @return The created column definition.
      */
     public static <D, T> ColumnDefinition<D, Void, T> createSimpleStateless(String title, CellContentFormatter cellFormatter,
@@ -328,6 +336,8 @@ public class ColumnDefinition<D, S, T> {
     /**
      * Extracts the aggregated data and converts it to String.
      *
+     * @param key
+     *            The aggregation key to query value of.
      * @param state
      *            The state object.
      * @return The extracted and converted value.
@@ -339,6 +349,8 @@ public class ColumnDefinition<D, S, T> {
 
 
     /**
+     * @param key
+     *            The aggregation key to query value of.
      * @return The aggregate row constant.
      */
     public Optional<String> getAggregateRowConstant(Object key) {
