@@ -1,5 +1,7 @@
 package hu.vissy.texttable.column;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -36,7 +38,7 @@ public class ColumnDefinition<D, S, T> {
         protected String title = "";
         protected DataConverter<T> dataConverter = new TrivialDataConverter<>();
         protected DataExtractor<D, S, T> dataExtractor;
-        protected String aggregateRowConstant = null;
+        protected Map<Object, String> aggregateRowConstants = new HashMap<>();
 
 
         /**
@@ -87,6 +89,28 @@ public class ColumnDefinition<D, S, T> {
             return (A) this;
         }
 
+        /**
+         * When the column is stateless, an empty value is returned as
+         * aggregated value by default. With this setter, an alternative
+         * constant value may be provided.
+         * <p>
+         * This method is a shortcut to the
+         * <code>withAggregateRowConstant(null, aggregateRowConstant)</code>
+         * function call.
+         * </p>
+         * <p>
+         * <i>Note, that setting this value to a non-null value will override
+         * the aggregate value even for a stateful column.</i>
+         * </p>
+         *
+         * @param aggregateRowConstant
+         *            The constant string to return.
+         * @return The builder instance.
+         */
+        public A withAggregateRowConstant(String aggregateRowConstant) {
+            return withAggregateRowConstant(null, aggregateRowConstant);
+        }
+
 
         /**
          * When the column is stateless, an empty value is returned as
@@ -97,13 +121,15 @@ public class ColumnDefinition<D, S, T> {
          * the aggregate value even for a stateful column.</i>
          * </p>
          *
+         * @param key
+         *            Key of the aggregator row.
          * @param aggregateRowConstant
          *            The constant string to return.
          * @return The builder instance.
          */
         @SuppressWarnings("unchecked")
-        public A withAggregateRowConstant(String aggregateRowConstant) {
-            this.aggregateRowConstant = aggregateRowConstant;
+        public A withAggregateRowConstant(Object key, String aggregateRowConstant) {
+            this.aggregateRowConstants.put(key, aggregateRowConstant);
             return (A) this;
         }
 
@@ -241,14 +267,14 @@ public class ColumnDefinition<D, S, T> {
     private DataExtractor<D, S, T> dataExtractor;
     private DataConverter<T> dataConverter;
     private CellContentFormatter cellContentFormatter;
-    private Optional<String> aggregateRowConstant;
+    private Map<Object, String> aggregateRowConstants;
 
     private ColumnDefinition(BuilderBase<D, S, T, ?> builder) {
         this.title = builder.title;
         this.cellContentFormatter = builder.cellContentFormatter;
         this.dataConverter = builder.dataConverter;
         this.dataExtractor = builder.dataExtractor;
-        this.aggregateRowConstant = Optional.ofNullable(builder.aggregateRowConstant);
+        this.aggregateRowConstants = builder.aggregateRowConstants;
     }
 
 
@@ -307,16 +333,16 @@ public class ColumnDefinition<D, S, T> {
      * @return The extracted and converted value.
      */
     @SuppressWarnings("unchecked")
-    public String getAggregateData(Object state) {
-        return getDataConverter().convert(getDataExtractor().extractAggregateData((S) state));
+    public String getAggregateData(Object key, Object state) {
+        return getDataConverter().convert(getDataExtractor().extractAggregateData(key, (S) state));
     }
 
 
     /**
      * @return The aggregate row constant.
      */
-    public Optional<String> getAggregateRowConstant() {
-        return aggregateRowConstant;
+    public Optional<String> getAggregateRowConstant(Object key) {
+        return Optional.ofNullable(aggregateRowConstants.get(key));
     }
 
 

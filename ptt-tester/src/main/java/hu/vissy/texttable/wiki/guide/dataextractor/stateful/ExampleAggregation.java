@@ -30,7 +30,7 @@ public class ExampleAggregation extends ExampleBase {
                             int val = Math.abs(r.getCrates());
                             s.count += val;
                             return val;
-                        }, StateCounter::new, (s) -> s.count))
+                        }, StateCounter::new, (k, s) -> s.count))
                         .build());
 
         TableFormatter<BusinessObject> formatter = builder.build();

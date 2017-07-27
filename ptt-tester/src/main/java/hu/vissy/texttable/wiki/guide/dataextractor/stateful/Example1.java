@@ -27,7 +27,7 @@ public class Example1 extends ExampleBase {
                 .withDataExtractor(new StatefulDataExtractor<>((r, s) -> {
                     s.count += r.getCrates();
                     return s.count;
-                }, StateCounter::new, (s) -> null))
+                }, StateCounter::new, (k, s) -> null))
                 .build());
 
         TableFormatter<BusinessObject> formatter = builder.build();

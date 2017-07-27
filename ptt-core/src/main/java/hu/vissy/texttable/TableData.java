@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import hu.vissy.texttable.TableRow.Type;
 import hu.vissy.texttable.column.ColumnDefinition;
 
 /**
@@ -54,12 +55,11 @@ public final class TableData<D> {
 
     private List<ColumnInfo> columns = new ArrayList<>();
     private List<TableRow> rows = new ArrayList<>();
-    private TableRow separator = new TableRow(0);
-    private TableRow aggregateRow;
+    private TableRow separator = new TableRow(Type.SEPARATOR, 0);
     private List<Integer> widths;
 
 
-    TableData(List<D> data, TableFormatter<D> tableFormatter) {
+    TableData(List<InputRow<D>> data, TableFormatter<D> tableFormatter) {
         super();
         tableFormatter.getColumns().stream().forEach(c -> this.columns.add(new ColumnInfo(c.getDefinition())));
         populate(data, tableFormatter);
@@ -72,16 +72,27 @@ public final class TableData<D> {
         return columns.size();
     }
 
-    private void populate(List<D> data, TableFormatter<D> tableFormatter) {
+    private void populate(List<InputRow<D>> data, TableFormatter<D> tableFormatter) {
         // Initialize the state objects
         columns.forEach(ci -> ci.initializeState());
 
         // Iterates over the real data records
-        for (D d : data) {
-            if (d == null) {
+        for (InputRow<D> ir : data) {
+            if (ir instanceof SeparatorRow) {
                 rows.add(separator);
-            } else {
-                TableRow row = new TableRow(getColumnCount());
+            } else if (ir instanceof AggregatorRow) {
+                TableRow aggregateRow = new TableRow(Type.AGGREGATOR, getColumnCount());
+                for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+                    TableData<D>.ColumnInfo ci = columns.get(columnIndex);
+                    ColumnDefinition<D, ?, ?> cd = ci.getDefinition();
+                    Object key = ((AggregatorRow<D>) ir).getKey();
+                    String value = cd.getAggregateRowConstant(key).orElse(cd.getAggregateData(key, ci.getState()));
+                    aggregateRow.setData(columnIndex, value);
+                }
+                rows.add(aggregateRow);
+            } else if (ir instanceof DataRow) {
+                D d = ((DataRow<D>) ir).getData();
+                TableRow row = new TableRow(Type.DATA, getColumnCount());
                 // Calculates the cell values
                 for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
                     TableData<D>.ColumnInfo ci = columns.get(columnIndex);
@@ -90,18 +101,8 @@ public final class TableData<D> {
                     row.setData(columnIndex, value);
                 }
                 rows.add(row);
-            }
-        }
-
-        // Calculates the aggregated values
-        if (tableFormatter.isShowAggregation()) {
-            aggregateRow = new TableRow(getColumnCount());
-            for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
-                TableData<D>.ColumnInfo ci = columns.get(columnIndex);
-                ColumnDefinition<D, ?, ?> cd = ci.getDefinition();
-                String value = cd.getAggregateRowConstant()
-                        .orElse(cd.getAggregateData(ci.getState()));
-                aggregateRow.setData(columnIndex, value);
+            } else {
+                throw new IllegalArgumentException("Unknown input row type: " + ir.getClass());
             }
         }
 
@@ -110,7 +111,7 @@ public final class TableData<D> {
             TableData<D>.ColumnInfo ci = columns.get(columnIndex);
             int maxWidth = tableFormatter.getHeaderConverter().convert(ci.getDefinition().getTitle()).length();
             for (TableRow r : rows) {
-                if (r != separator) {
+                if (r.getType() != Type.SEPARATOR) {
                     String value = r.getValue(columnIndex);
                     if (value == null) {
                         value = ci.getDefinition().getCellContentFormatter().getNullValue();
@@ -120,9 +121,6 @@ public final class TableData<D> {
                         maxWidth = w;
                     }
                 }
-            }
-            if (tableFormatter.isShowAggregation()) {
-                maxWidth = Math.max(maxWidth, aggregateRow.getValue(columnIndex) == null ? 0 : aggregateRow.getValue(columnIndex).length());
             }
 
             ci.setWidth(maxWidth);
@@ -156,25 +154,5 @@ public final class TableData<D> {
     List<TableRow> getRows() {
         return rows;
     }
-
-    /**
-     * @return The unmodifiable aggragation data row.
-     */
-    public TableRow getAggregateRow() {
-        return aggregateRow;
-    }
-
-    /**
-     * Checks if a table row is a separator marker or a common data row.
-     *
-     * @param tr
-     *            The row to check.
-     * @return True if the row is a separator, false if the row is a common data
-     *         row.
-     */
-    public boolean isSeparator(TableRow tr) {
-        return tr == separator;
-    }
-
 
 }

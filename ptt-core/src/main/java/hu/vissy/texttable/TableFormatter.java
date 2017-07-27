@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import hu.vissy.texttable.BorderFormatter.LineType;
 import hu.vissy.texttable.BorderFormatter.RowType;
+import hu.vissy.texttable.TableRow.Type;
 import hu.vissy.texttable.column.ColumnDefinition;
 import hu.vissy.texttable.contentformatter.CellContentFormatter;
 import hu.vissy.texttable.contentformatter.EllipsisDecorator;
@@ -459,6 +460,10 @@ public class TableFormatter<D> {
      * @return The formatted table.
      */
     public String apply(List<D> data) {
+        return applyToInput(InputBuilder.<D> convertFromVersion1(showAggregation, data));
+    }
+
+    public String applyToInput(List<InputRow<D>> data) {
         // Building intermediate structure
         TableData<D> td = processData(data);
         // Calculating column widths
@@ -490,32 +495,23 @@ public class TableFormatter<D> {
         }
 
         // Printing data rows
-        boolean prevSep = true;
+        Type prevType = null;
         for (TableRow tr : td.getRows()) {
-            if (td.isSeparator(tr)) {
+            if (prevType == Type.AGGREGATOR || tr.getType() == Type.AGGREGATOR) {
+                sb.append(borderFormatter.drawLine(widths, LineType.AGGREGATE_LINE, false));
+            } else if (tr.getType() == Type.SEPARATOR) {
                 sb.append(borderFormatter.drawLine(widths, LineType.SEPARATOR_LINE, false));
-                prevSep = true;
-            } else {
-                if (separateDataWithLines && !prevSep) {
-                    sb.append(borderFormatter.drawLine(widths, LineType.INTERNAL_LINE, false));
-                }
+            } else if (separateDataWithLines && prevType == Type.DATA) {
+                sb.append(borderFormatter.drawLine(widths, LineType.INTERNAL_LINE, false));
+            }
+            if (tr.getType() != Type.SEPARATOR) {
                 sb.append(borderFormatter.drawData(columns.stream()
                         .map(cd -> cd.getDefinition().getCellContentFormatter().formatCell(tr.getValue(cd.getIndex()), widths.get(cd.getIndex())))
                         .collect(Collectors.toList()), RowType.DATA));
-                prevSep = false;
             }
+            prevType = tr.getType();
         }
-        // Printing aggragation row
-        if (showAggregation) {
-            sb.append(borderFormatter.drawLine(widths, LineType.AGGREGATE_LINE, false));
-            sb.append(borderFormatter.drawData(
-                    columns.stream().map(cd -> cd.getDefinition().getCellContentFormatter().formatCell(
-                            td.getAggregateRow().getValue(cd.getIndex()),
-                            widths.get(cd.getIndex())))
-                            .collect(Collectors.toList()),
-                    RowType.AGGREGATE));
 
-        }
         sb.append(borderFormatter.drawLine(widths, LineType.BOTTOM_EDGE, false));
 
         return sb.toString();
@@ -534,7 +530,7 @@ public class TableFormatter<D> {
      *            The data to transform.
      * @return The transformed data as an intermediate imutable structure.
      */
-    public TableData<D> processData(List<D> data) {
+    public TableData<D> processData(List<InputRow<D>> data) {
         TableData<D> td = new TableData<>(data, this);
         return td;
     }

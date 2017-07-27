@@ -1,7 +1,6 @@
 package hu.vissy.texttable.dataextractor;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -40,7 +39,7 @@ public class StatefulDataExtractor<D, S, T> extends DataExtractor<D, S, T> {
      *            called at most once, after all the data records are processed
      *            and the aggregation line is populated.
      */
-    public StatefulDataExtractor(BiFunction<D, S, T> rowDataExtractor, Supplier<S> stateInitializer, Function<S, T> aggregateDataExtractor) {
+    public StatefulDataExtractor(BiFunction<D, S, T> rowDataExtractor, Supplier<S> stateInitializer, BiFunction<Object, S, T> aggregateDataExtractor) {
         super(rowDataExtractor, stateInitializer, aggregateDataExtractor);
     }
 

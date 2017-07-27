@@ -1,7 +1,6 @@
 package hu.vissy.texttable.dataextractor;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -21,7 +20,7 @@ public abstract class DataExtractor<D, S, T> {
 
     private Supplier<S> stateInitializer = () -> null;
     private BiFunction<D, S, T> rowDataExtractor;
-    private Function<S, T> aggregateDataExtractor = s -> null;
+    private BiFunction<Object, S, T> aggregateDataExtractor = (k, s) -> null;
 
     /**
      * The constructor of the data extractor.
@@ -39,7 +38,7 @@ public abstract class DataExtractor<D, S, T> {
      *            called at most once, after all the data records are processed
      *            and the aggregation line is populated.
      */
-    public DataExtractor(BiFunction<D, S, T> rowDataExtractor, Supplier<S> stateInitializer, Function<S, T> aggregateDataExtractor) {
+    public DataExtractor(BiFunction<D, S, T> rowDataExtractor, Supplier<S> stateInitializer, BiFunction<Object, S, T> aggregateDataExtractor) {
         super();
         this.stateInitializer = stateInitializer;
         this.rowDataExtractor = rowDataExtractor;
@@ -63,7 +62,7 @@ public abstract class DataExtractor<D, S, T> {
     /**
      * @return The aggregation value extraction closure.
      */
-    public Function<S, T> getAggregateDataExtractor() {
+    public BiFunction<Object, S, T> getAggregateDataExtractor() {
         return aggregateDataExtractor;
     }
 
@@ -84,12 +83,14 @@ public abstract class DataExtractor<D, S, T> {
     /**
      * Extracts the aggregation data.
      *
+     * @param key
+     *            The key of the aggregation.
      * @param state
      *            The state object.
      * @return The value for the aggregation.
      */
-    public T extractAggregateData(S state) {
-        return aggregateDataExtractor.apply(state);
+    public T extractAggregateData(Object key, S state) {
+        return aggregateDataExtractor.apply(key, state);
     }
 
 

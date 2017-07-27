@@ -21,10 +21,15 @@ import java.util.List;
  */
 public final class TableRow {
 
-    private String[] values;
+    public enum Type {
+        DATA, AGGREGATOR, SEPARATOR
+    }
 
-    TableRow(int columnCount) {
-        super();
+    private String[] values;
+    private Type type;
+
+    TableRow(Type type, int columnCount) {
+        this.type = type;
         values = new String[columnCount];
         Arrays.fill(values, "");
     }
@@ -56,5 +61,8 @@ public final class TableRow {
     }
 
 
+    public Type getType() {
+        return type;
+    }
 
 }

@@ -29,7 +29,7 @@ public class ExamplePreviousRowDependency extends ExampleBase {
                     int val = Math.abs(s.prev - r.getPosition());
                     s.prev = r.getPosition();
                     return val;
-                }, () -> new StatePrev(5), (s) -> null))
+                }, () -> new StatePrev(5), (k, s) -> null))
                 .build());
 
         TableFormatter<BusinessObject> formatter = builder.build();

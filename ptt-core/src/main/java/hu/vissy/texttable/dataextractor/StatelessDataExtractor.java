@@ -9,7 +9,7 @@ import java.util.function.Function;
  * </p>
  *
  * <pre>
- *      {@code new DataExtractor<D, Void, T>((d,s) -> rowDataExtractor.apply(d), () -> null, (s) -> null);}
+ *      {@code new DataExtractor<D, Void, T>((d,s) -> rowDataExtractor.apply(d), () -> null, (k, s) -> null);}
  * </pre>
  *
  * @author Balage
@@ -30,7 +30,7 @@ public class StatelessDataExtractor<D, T> extends DataExtractor<D, Void, T> {
      *            same order they are in the input list.
      */
     public StatelessDataExtractor(Function<D, T> rowDataExtractor) {
-        super((d, s) -> rowDataExtractor.apply(d), () -> null, (s) -> null);
+        super((d, s) -> rowDataExtractor.apply(d), () -> null, (k, s) -> null);
     }
 
 }
