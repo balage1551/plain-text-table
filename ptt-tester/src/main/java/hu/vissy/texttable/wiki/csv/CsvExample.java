@@ -21,18 +21,14 @@ import hu.vissy.texttable.dataconverter.NumberDataConverter;
 
 public class CsvExample {
 
-    private static class Data {
-        String string;
-        LocalDateTime dateTime;
-        int anInteger;
-        double aDouble;
+    private static final char CSV_DELIMITER = ';';
 
-        /**
-         * @param string
-         * @param dateTime
-         * @param anInteger
-         * @param aDouble
-         */
+    private static class Data {
+        private String string;
+        private LocalDateTime dateTime;
+        private int anInteger;
+        private double aDouble;
+
         public Data(String string, LocalDateTime dateTime, int anInteger, double aDouble) {
             super();
             this.string = string;
@@ -64,21 +60,9 @@ public class CsvExample {
         public String convert(T d) {
             return d == null ? null : "\"" + d.toString().replaceAll(Pattern.quote("\""), "\"\"") + "\"";
         }
-
     }
 
     public static void main(String[] args) {
-
-        CellContentFormatter csvCellContentFormatter = new CellContentFormatter.Builder()
-                .withEllipsesDecorator(new EllipsisDecorator.Builder().withEllipsisSign("").build())
-                .withCellAlignment(new CellAlignment() {
-
-                    @Override
-                    public String align(String data, int width) {
-                        return data;
-                    }
-                })
-                .build();
 
         NumberFormat csvDoubleFormatter = NumberFormat.getInstance();
         csvDoubleFormatter.setGroupingUsed(false);
@@ -92,10 +76,23 @@ public class CsvExample {
         csvIntegerFormatter.setRoundingMode(RoundingMode.UNNECESSARY);
         NumberDataConverter<Integer> csvIntegerConverter = new NumberDataConverter<>(csvIntegerFormatter);
 
+        DataConverter<LocalDateTime> csvDateTimeDataConverter = (s) -> s == null ? null : s.toString().replaceAll("T", " ");
+
+        CellContentFormatter csvCellContentFormatter = new CellContentFormatter.Builder()
+                .withEllipsesDecorator(new EllipsisDecorator.Builder().withEllipsisSign("").build())
+                .withCellAlignment(new CellAlignment() {
+                    @Override
+                    public String align(String data, int width) {
+                        return data;
+                    }
+                })
+                .build();
+
+
         TableFormatter<Data> formatter = new TableFormatter.Builder<Data>()
                 .withHeaderConverter(new CsvStringDataConverter<String>())
                 .withBorderFormatter(new BorderFormatter.Builder(DefaultFormatters.EMPTY)
-                        .withUniformRow(new RowSpec('\0', ';', '\0'))
+                        .withUniformRow(new RowSpec('\0', CSV_DELIMITER, '\0'))
                         .withDrawVerticalSeparator(true)
                         .build())
                 .withColumn(new ColumnDefinition.StatelessBuilder<Data, String>()
@@ -107,7 +104,7 @@ public class CsvExample {
                 .withColumn(new ColumnDefinition.StatelessBuilder<Data, LocalDateTime>()
                         .withTitle("Date")
                         .withCellContentFormatter(csvCellContentFormatter)
-                        .withDataConverter(new CsvStringDataConverter<>())
+                        .withDataConverter(csvDateTimeDataConverter)
                         .withDataExtractor(d -> d.getDateTime())
                         .build())
                 .withColumn(new ColumnDefinition.StatelessBuilder<Data, Integer>()
@@ -129,7 +126,7 @@ public class CsvExample {
         data.add(new Data(null, null, 7000, 2d / 3));
         data.add(new Data("banana \"juice\"", LocalDateTime.now().minus(100, ChronoUnit.HOURS), -42, 5d));
 
-        System.out.println(">>>>>>>>>>>>>>>>>>\n" + formatter.apply(data) + "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        System.out.println(formatter.apply(data));
     }
 
 }
