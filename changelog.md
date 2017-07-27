@@ -2,6 +2,20 @@
 
 ## Change log
 
+### Version 2.0.0 (2017-07-27 16:54:15.53)
+
+#### New features
+
+- New preset: empty formatting (no border, padding, lines)
+- Adding headerConverter to formatter
+- CsvExample added
+- Support for turning off (hiding) header line
+- InputBuilder introduced
+
+#### Backward incompabilities
+
+- Multiple aggregation rows (subtotals)
+
 ### Version 1.3.2 (2017-07-03 15:28:51.251)
 
 #### Bugfixes
