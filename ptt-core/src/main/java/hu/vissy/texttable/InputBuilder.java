@@ -12,11 +12,6 @@ import java.util.List;
  * @param <D>
  *            The type of the input record.
  */
-/**
- * @author Balage
- *
- * @param <D>
- */
 public class InputBuilder<D> {
 
     private List<InputRow<D>> rows = new ArrayList<>();
@@ -29,6 +24,8 @@ public class InputBuilder<D> {
      *            Whether to add final aggregator row.
      * @param data
      *            The list of data and separator (null) records.
+     * @param <D>
+     *            The type of the input record.
      * @return The constructed list of input rows.
      */
     public static <D> List<InputRow<D>> convertFromVersion1(boolean showAggregation, List<D> data) {
