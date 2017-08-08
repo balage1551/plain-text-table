@@ -32,7 +32,7 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
 public class ColumnDefinition<D, S, T> {
 
 
-    private static class BuilderBase<D, S, T, A extends BuilderBase<D, S, T, A>> {
+    private static abstract class BuilderBase<D, S, T, A extends BuilderBase<D, S, T, A>> {
         protected CellContentFormatter cellContentFormatter = CellContentFormatter
                 .leftAlignedCell();
         protected String title = "";
