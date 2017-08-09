@@ -130,7 +130,7 @@ public class CsvTableFormatterBuilder<D> {
      * @param quote
      *            The quote character.
      * @return The builder instance.
-     * @see {@linkplain #withQuoter(Function)}
+     * @see #withQuoter(Function)
      */
     public CsvTableFormatterBuilder<D> withQuote(char quote) {
         return withQuote(quote, "" + quote + quote);
@@ -152,7 +152,7 @@ public class CsvTableFormatterBuilder<D> {
      * @param escapeQuote
      *            The character used to replace quote character.
      * @return The builder instance.
-     * @see {@linkplain #withQuoter(Function)}
+     * @see #withQuoter(Function)
      */
     public CsvTableFormatterBuilder<D> withQuote(char quote, String escapeQuote) {
         this.quote = quote;
@@ -248,6 +248,9 @@ public class CsvTableFormatterBuilder<D> {
      * Adds a column with unknown type. It will be handled as a String with the
      * value get by toString().
      *
+     * @param <T>
+     *            The type of the input.
+     * 
      * @param header
      *            The title of the column.
      * @param extractor
@@ -261,6 +264,9 @@ public class CsvTableFormatterBuilder<D> {
     /**
      * Adds a column with unknown type. It will be handled as a String with the
      * value get by toString().
+     *
+     * @param <T>
+     *            The type of the input.
      *
      * @param header
      *            The title of the column.
