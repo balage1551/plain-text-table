@@ -2,6 +2,21 @@
 
 ## Change log
 
+### Version 3.0.0 (2017-08-09 13:42:08.536)
+
+#### New features
+
+- Subtotal example added
+- Adding CSV table formatter out-of-box
+
+#### Bugfixes
+
+- Some more javadoc fixing in InputBuilder
+
+#### Backward incompabilities
+
+- automated CSV table formatter generation from other TableFormatter
+
 ### Version 2.0.0 (2017-07-27 16:54:15.53)
 
 #### New features
