@@ -7,13 +7,14 @@ import java.time.Duration;
  * <p>
  * This implementation formats the duration in a hours:minutes:seconds format.
  * </p>
- * 
+ *
  * @author Balage
  *
  */
-public class SimpleDurationDataConverter implements DataConverter<Duration> {
+public class SimpleDurationDataConverter extends TypedDataConverter<Duration> {
 
     public SimpleDurationDataConverter() {
+        super(Duration.class);
     }
 
 

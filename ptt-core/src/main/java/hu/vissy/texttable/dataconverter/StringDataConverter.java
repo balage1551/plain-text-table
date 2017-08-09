@@ -6,7 +6,14 @@ package hu.vissy.texttable.dataconverter;
  * @author Balage
  *
  */
-public class StringDataConverter implements DataConverter<String> {
+public class StringDataConverter extends TypedDataConverter<String> {
+
+    /**
+     * Constructor.
+     */
+    public StringDataConverter() {
+        super(String.class);
+    }
 
     @Override
     public String convert(String data) {

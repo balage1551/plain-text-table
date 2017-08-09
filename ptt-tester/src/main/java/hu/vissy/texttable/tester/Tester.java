@@ -12,7 +12,9 @@ import java.util.stream.IntStream;
 
 import hu.vissy.texttable.BorderFormatter;
 import hu.vissy.texttable.BorderFormatter.DefaultFormatters;
+import hu.vissy.texttable.CsvTableFormatterBuilder;
 import hu.vissy.texttable.InputBuilder;
+import hu.vissy.texttable.InputRow;
 import hu.vissy.texttable.TableFormatter;
 import hu.vissy.texttable.column.ColumnDefinition;
 import hu.vissy.texttable.contentformatter.CellContentFormatter;
@@ -22,6 +24,7 @@ import hu.vissy.texttable.dataconverter.DateTimeDataConverter;
 import hu.vissy.texttable.dataconverter.NumberDataConverter;
 import hu.vissy.texttable.dataconverter.SimpleDurationDataConverter;
 import hu.vissy.texttable.dataconverter.TimeDataConverter;
+import hu.vissy.texttable.dataconverter.TypedTrivialDataConverter;
 import hu.vissy.texttable.dataextractor.StatefulDataExtractor;
 
 public class Tester {
@@ -93,6 +96,7 @@ public class Tester {
                         .withTitle("Fruit")
                         .withAggregateRowConstant("TOTAL")
                         .withDataExtractor(o -> o.getName())
+                        .withDataConverter(new TypedTrivialDataConverter<>(String.class))
                         .withCellContentFormatter(new CellContentFormatter.Builder().withMinWidth(8).build())
                         .build())
                 .withColumn(new ColumnDefinition.StatefulBuilder<TestObject, Sum, Double>()
@@ -158,7 +162,17 @@ public class Tester {
                                 CellContentFormatter.centeredCell())
                         .build())
                 .build();
-        System.out.println(formatter.apply(generate(15)));
+        List<TestObject> data = generate(15);
+        System.out.println(formatter.apply(data));
+
+
+        TableFormatter<TestObject> csvFormatter = new CsvTableFormatterBuilder<TestObject>()
+                .withDelimiter(';')
+                .fromTableFormatter(formatter)
+                .build();
+
+        System.out.println(csvFormatter.apply(data));
+
     }
 
     private void run2() {
@@ -293,6 +307,7 @@ public class Tester {
                 .withColumn(new ColumnDefinition.StatefulBuilder<SubTotalDemoRecord, SubTotalDemoAggregator, String>()
                         .withTitle("Fruit")
                         .withAggregateRowConstant(SubTotalDemoAggrRowId.TOTAL, "GRAND TOTAL")
+                        .withDataConverter(new TypedTrivialDataConverter<>(String.class))
                         .withDataExtractor(new StatefulDataExtractor<>(
                                 (o, s) -> {
                                     s.actFruit = o.getFruit();
@@ -304,6 +319,7 @@ public class Tester {
                         .build())
                 .withColumn(new ColumnDefinition.StatelessBuilder<SubTotalDemoRecord, Integer>()
                         .withTitle("Quarter")
+                        .withDataConverter(NumberDataConverter.defaultIntegerFormatter())
                         .withDataExtractor(o -> o.getQuarter())
                         .withCellContentFormatter(CellContentFormatter.rightAlignedCell())
                         .build())
@@ -343,8 +359,16 @@ public class Tester {
         builder.addAggregator(SubTotalDemoAggrRowId.FRUIT_TOTAL);
         builder.addAggregator(SubTotalDemoAggrRowId.TOTAL);
 
-        String s = formatter.applyToInput(builder.build());
+        List<InputRow<SubTotalDemoRecord>> data = builder.build();
+        String s = formatter.applyToInput(data);
         System.out.println(s);
+
+        TableFormatter<SubTotalDemoRecord> csvFormatter = new CsvTableFormatterBuilder<SubTotalDemoRecord>()
+                .withDelimiter(';')
+                .fromTableFormatter(formatter)
+                .build();
+
+        System.out.println(csvFormatter.applyToInput(data));
 
     }
 

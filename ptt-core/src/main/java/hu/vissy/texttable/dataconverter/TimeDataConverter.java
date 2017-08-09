@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
  * @author Balage
  *
  */
-public class TimeDataConverter implements DataConverter<LocalTime> {
+public class TimeDataConverter extends TypedDataConverter<LocalTime> {
 
     DateTimeFormatter formatter;
 
@@ -18,6 +18,7 @@ public class TimeDataConverter implements DataConverter<LocalTime> {
      * {@linkplain DateTimeFormatter#ISO_LOCAL_TIME} format.
      */
     public TimeDataConverter() {
+        super(LocalTime.class);
         formatter = DateTimeFormatter.ISO_LOCAL_TIME;
     }
 
@@ -29,7 +30,7 @@ public class TimeDataConverter implements DataConverter<LocalTime> {
      *            The time formatter to use.
      */
     public TimeDataConverter(DateTimeFormatter formatter) {
-        super();
+        super(LocalTime.class);
         this.formatter = formatter;
     }
 

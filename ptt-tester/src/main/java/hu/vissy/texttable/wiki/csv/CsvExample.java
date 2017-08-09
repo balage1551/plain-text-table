@@ -67,14 +67,14 @@ public class CsvExample {
         NumberFormat csvDoubleFormatter = NumberFormat.getInstance();
         csvDoubleFormatter.setGroupingUsed(false);
         csvDoubleFormatter.setRoundingMode(RoundingMode.HALF_UP);
-        NumberDataConverter<Double> csvDoubleConverter = new NumberDataConverter<>(csvDoubleFormatter);
+        NumberDataConverter<Double> csvDoubleConverter = new NumberDataConverter<>(Double.class, csvDoubleFormatter);
 
         NumberFormat csvIntegerFormatter = NumberFormat.getInstance();
         csvIntegerFormatter.setMaximumFractionDigits(0);
         csvIntegerFormatter.setMinimumFractionDigits(0);
         csvIntegerFormatter.setGroupingUsed(false);
         csvIntegerFormatter.setRoundingMode(RoundingMode.UNNECESSARY);
-        NumberDataConverter<Integer> csvIntegerConverter = new NumberDataConverter<>(csvIntegerFormatter);
+        NumberDataConverter<Integer> csvIntegerConverter = new NumberDataConverter<>(Integer.class, csvIntegerFormatter);
 
         DataConverter<LocalDateTime> csvDateTimeDataConverter = (s) -> s == null ? null : s.toString().replaceAll("T", " ");
 

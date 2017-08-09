@@ -3,7 +3,7 @@ package hu.vissy.texttable.dataconverter;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 
-public class NumberDataConverter<T extends Number> implements DataConverter<T> {
+public class NumberDataConverter<T extends Number> extends TypedDataConverter<T> {
 
     public static NumberDataConverter<Double> defaultDoubleFormatter() {
         NumberFormat formatter = NumberFormat.getInstance();
@@ -11,7 +11,7 @@ public class NumberDataConverter<T extends Number> implements DataConverter<T> {
         formatter.setMinimumFractionDigits(2);
         formatter.setGroupingUsed(false);
         formatter.setRoundingMode(RoundingMode.HALF_UP);
-        return new NumberDataConverter<>(formatter);
+        return new NumberDataConverter<>(Double.class, formatter);
     }
 
     public static NumberDataConverter<Integer> defaultIntegerFormatter() {
@@ -20,7 +20,7 @@ public class NumberDataConverter<T extends Number> implements DataConverter<T> {
         formatter.setMinimumFractionDigits(0);
         formatter.setGroupingUsed(true);
         formatter.setRoundingMode(RoundingMode.UNNECESSARY);
-        return new NumberDataConverter<>(formatter);
+        return new NumberDataConverter<>(Integer.class, formatter);
     }
 
     public static NumberDataConverter<Long> defaultLongFormatter() {
@@ -29,15 +29,15 @@ public class NumberDataConverter<T extends Number> implements DataConverter<T> {
         formatter.setMinimumFractionDigits(0);
         formatter.setGroupingUsed(true);
         formatter.setRoundingMode(RoundingMode.UNNECESSARY);
-        return new NumberDataConverter<>(formatter);
+        return new NumberDataConverter<>(Long.class, formatter);
     }
 
 
     NumberFormat formatter;
 
 
-    public NumberDataConverter(NumberFormat formatter) {
-        super();
+    public NumberDataConverter(Class<T> clazz, NumberFormat formatter) {
+        super(clazz);
         this.formatter = formatter;
     }
 

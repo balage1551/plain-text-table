@@ -22,6 +22,7 @@ import hu.vissy.texttable.contentformatter.EllipsisDecorator;
 import hu.vissy.texttable.dataconverter.DataConverter;
 import hu.vissy.texttable.dataconverter.NumberDataConverter;
 import hu.vissy.texttable.dataconverter.StringDataConverter;
+import hu.vissy.texttable.dataconverter.TypedDataConverter;
 import hu.vissy.texttable.dataextractor.DataExtractor;
 import hu.vissy.texttable.dataextractor.StatefulDataExtractor;
 import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
@@ -37,6 +38,7 @@ import hu.vissy.texttable.dataextractor.StatelessDataExtractor;
 public class CsvTableFormatterBuilder<D> {
 
     private enum CsvColumnType {
+        UKNOWN,
         STRING,
         INTEGER,
         DOUBLE,
@@ -49,6 +51,7 @@ public class CsvTableFormatterBuilder<D> {
         public CsvColumnType type;
         public String header;
         public DataExtractor<D, ?, ?> extractor;
+        public DataConverter<?> converter;
 
         public DataColumn(CsvColumnType type, String header, DataExtractor<D, ?, ?> extractor) {
             super();
@@ -56,6 +59,15 @@ public class CsvTableFormatterBuilder<D> {
             this.header = header;
             this.extractor = extractor;
         }
+
+        public DataColumn(CsvColumnType type, String header, DataExtractor<D, ?, ?> extractor, DataConverter<?> converter) {
+            super();
+            this.type = type;
+            this.header = header;
+            this.extractor = extractor;
+            this.converter = converter;
+        }
+
     }
 
     private Locale locale = Locale.getDefault();
@@ -208,6 +220,56 @@ public class CsvTableFormatterBuilder<D> {
     private CsvTableFormatterBuilder<D> withColumn(CsvColumnType type, String header, DataExtractor<D, ?, ?> extractor) {
         columns.add(new DataColumn(type, header, extractor));
         return this;
+    }
+
+    /**
+     * Adds a column with an inherited data converter. The output will be
+     * escaped and quoted.
+     *
+     * @param type
+     *            The type of the column.
+     * @param title
+     *            The title of the column.
+     * @param extractor
+     *            The data extractor.
+     * @param converter
+     *            The data converter.
+     * @return The builder itself.
+     */
+    public CsvTableFormatterBuilder<D> withInheritedColumn(CsvColumnType type, String title, DataExtractor<D, ?, ?> extractor,
+            DataConverter<?> converter) {
+        columns.add(new DataColumn(type, title, extractor, converter));
+        return this;
+    }
+
+
+
+    /**
+     * Adds a column with unknown type. It will be handled as a String with the
+     * value get by toString().
+     *
+     * @param header
+     *            The title of the column.
+     * @param extractor
+     *            The data extractor of the column.
+     * @return The builder itself.
+     */
+    public <T> CsvTableFormatterBuilder<D> withUnknownColumn(String header, Function<D, T> extractor) {
+        return withColumn(CsvColumnType.UKNOWN, header, extractor);
+    }
+
+    /**
+     * Adds a column with unknown type. It will be handled as a String with the
+     * value get by toString().
+     *
+     * @param header
+     *            The title of the column.
+     * @param extractor
+     *            The data extractor of the column.
+     * @return The builder itself.
+     */
+    public <T> CsvTableFormatterBuilder<D> withUnknownColumn(String header, DataExtractor<D, ?, T> extractor) {
+        return withColumn(CsvColumnType.UKNOWN, header, extractor);
     }
 
     /**
@@ -393,12 +455,35 @@ public class CsvTableFormatterBuilder<D> {
     }
 
 
-//    public CsvTableFormatterBuilder<D> fromTableFormatter(TableFormatter<D> formatter) {
-//        for (TableFormatter<D>.IndexedColumnDefinition<?, ?> cd : formatter.getColumns()) {
-//
-//        }
-//        return this;
-//    }
+    @SuppressWarnings("unchecked")
+    public CsvTableFormatterBuilder<D> fromTableFormatter(TableFormatter<D> formatter) {
+        for (TableFormatter<D>.IndexedColumnDefinition<?, ?> cd : formatter.getColumns()) {
+            DataConverter<?> converter = cd.getDefinition().getDataConverter();
+            if (converter instanceof TypedDataConverter) {
+                TypedDataConverter<?> typedConverter = (TypedDataConverter<?>) converter;
+                if (Integer.class.isAssignableFrom(typedConverter.getAcceptedClass())) {
+                    withIntegerColumn(cd.getTitle(), (DataExtractor<D, ?, Integer>) cd.getDefinition().getDataExtractor());
+                } else if (Double.class.isAssignableFrom(typedConverter.getAcceptedClass())) {
+                    withDoubleColumn(cd.getTitle(), (DataExtractor<D, ?, Double>) cd.getDefinition().getDataExtractor());
+                } else if (LocalDate.class.isAssignableFrom(typedConverter.getAcceptedClass())) {
+                    withDateColumn(cd.getTitle(), (DataExtractor<D, ?, LocalDate>) cd.getDefinition().getDataExtractor());
+                } else if (LocalTime.class.isAssignableFrom(typedConverter.getAcceptedClass())) {
+                    withTimeColumn(cd.getTitle(), (DataExtractor<D, ?, LocalTime>) cd.getDefinition().getDataExtractor());
+                } else if (LocalDateTime.class.isAssignableFrom(typedConverter.getAcceptedClass())) {
+                    withDateTimeColumn(cd.getTitle(), (DataExtractor<D, ?, LocalDateTime>) cd.getDefinition().getDataExtractor());
+                } else if (String.class.isAssignableFrom(typedConverter.getAcceptedClass())) {
+                    withStringColumn(cd.getTitle(), (DataExtractor<D, ?, String>) cd.getDefinition().getDataExtractor());
+                } else {
+                    withInheritedColumn(CsvColumnType.UKNOWN, cd.getTitle(), cd.getDefinition().getDataExtractor(), cd.getDefinition().getDataConverter());
+                }
+            } else {
+                throw new IllegalArgumentException("Automatic column conversion needs TypedDataConverter: " + cd.getTitle() + " ("
+                        + converter.getClass().getCanonicalName() + ")");
+            }
+        }
+        return this;
+    }
+
 
 
     private class CsvStringDataConverter<T> implements DataConverter<T> {
@@ -406,6 +491,24 @@ public class CsvTableFormatterBuilder<D> {
         @Override
         public String convert(T d) {
             return quoter.apply(d == null ? null : "" + d);
+        }
+    }
+
+
+
+    private class CsvInheritedDataConverter<T> extends CsvStringDataConverter<T> {
+
+        private DataConverter<T> innerDataConverter;
+
+        public CsvInheritedDataConverter(DataConverter<T> innerDataConverter) {
+            super();
+            this.innerDataConverter = innerDataConverter;
+        }
+
+        @Override
+        public String convert(T d) {
+            String str = innerDataConverter.convert(d);
+            return quoter.apply(str);
         }
     }
 
@@ -424,18 +527,36 @@ public class CsvTableFormatterBuilder<D> {
         csvDoubleFormatter.setMaximumFractionDigits(maximumFractionDigits);
         csvDoubleFormatter.setGroupingUsed(false);
         csvDoubleFormatter.setRoundingMode(RoundingMode.HALF_UP);
-        NumberDataConverter<Double> csvDoubleConverter = new NumberDataConverter<>(csvDoubleFormatter);
+        NumberDataConverter<Double> csvDoubleConverter = new NumberDataConverter<>(Double.class, csvDoubleFormatter);
 
         NumberFormat csvIntegerFormatter = NumberFormat.getInstance(locale);
         csvIntegerFormatter.setMaximumFractionDigits(0);
         csvIntegerFormatter.setMinimumFractionDigits(0);
         csvIntegerFormatter.setGroupingUsed(false);
         csvIntegerFormatter.setRoundingMode(RoundingMode.UNNECESSARY);
-        NumberDataConverter<Integer> csvIntegerConverter = new NumberDataConverter<>(csvIntegerFormatter);
+        NumberDataConverter<Integer> csvIntegerConverter = new NumberDataConverter<>(Integer.class, csvIntegerFormatter);
 
         DataConverter<LocalDate> csvDateDataConverter = (s) -> s == null ? null : s.toString();
-        DataConverter<LocalTime> csvTimeDataConverter = (s) -> s == null ? null : s.toString().substring(0, s.toString().indexOf("."));
-        DataConverter<LocalDateTime> csvDateTimeDataConverter = (s) -> s == null ? null : s.toString().replaceAll("T", " ");
+        DataConverter<LocalTime> csvTimeDataConverter = (s) -> {
+            if (s == null) {
+                return null;
+            }
+            String str = s.toString();
+            if (str.indexOf('.') != -1) {
+                str = str.substring(0, str.indexOf("."));
+            }
+            return str;
+        };
+        DataConverter<LocalDateTime> csvDateTimeDataConverter = (s) -> {
+            if (s == null) {
+                return null;
+            }
+            String str = s.toString().replaceAll("T", " ");
+            if (str.indexOf('.') != -1) {
+                str = str.substring(0, str.indexOf("."));
+            }
+            return str;
+        };
 
         CellContentFormatter csvCellContentFormatter = new CellContentFormatter.Builder()
                 .withEllipsesDecorator(new EllipsisDecorator.Builder().withEllipsisSign("").build())
@@ -447,7 +568,9 @@ public class CsvTableFormatterBuilder<D> {
                 })
                 .build();
 
+
         EnumMap<CsvColumnType, DataConverter<?>> converterMapping = new EnumMap<>(CsvColumnType.class);
+        converterMapping.put(CsvColumnType.UKNOWN, (s) -> quoter.apply("" + s));
         converterMapping.put(CsvColumnType.STRING, new StringDataConverter());
         converterMapping.put(CsvColumnType.INTEGER, csvIntegerConverter);
         converterMapping.put(CsvColumnType.DOUBLE, csvDoubleConverter);
@@ -481,17 +604,21 @@ public class CsvTableFormatterBuilder<D> {
     @SuppressWarnings("unchecked")
     private ColumnDefinition<D, ?, ?> createColumn(DataColumn dc, CellContentFormatter csvCellContentFormatter,
             EnumMap<CsvColumnType, DataConverter<?>> converterMapping) {
+        DataConverter<?> dataConverter = converterMapping.get(dc.type);
+        if (dc.converter != null) {
+            dataConverter = new CsvInheritedDataConverter<>(dc.converter);
+        }
         if (dc.extractor instanceof StatelessDataExtractor) {
             return new ColumnDefinition.StatelessBuilder<D, Object>()
                     .withTitle(dc.header)
-                    .withDataConverter((DataConverter<Object>) converterMapping.get(dc.type))
+                    .withDataConverter((DataConverter<Object>) dataConverter)
                     .withCellContentFormatter(csvCellContentFormatter)
                     .withDataExtractor((StatelessDataExtractor<D, Object>) dc.extractor)
                     .build();
         } else {
             return new ColumnDefinition.StatefulBuilder<D, Object, Object>()
                     .withTitle(dc.header)
-                    .withDataConverter((DataConverter<Object>) converterMapping.get(dc.type))
+                    .withDataConverter((DataConverter<Object>) dataConverter)
                     .withCellContentFormatter(csvCellContentFormatter)
                     .withDataExtractor((StatefulDataExtractor<D, Object, Object>) dc.extractor)
                     .build();

@@ -23,7 +23,7 @@ public class NumberExample2 {
         TableFormatter<Double> formatter = new TableFormatter.Builder<Double>()
                 .withColumn(new ColumnDefinition.StatelessBuilder<Double, Double>()
                         .withTitle("double")
-                        .withDataConverter(new NumberDataConverter<>(numberFormatter))
+                        .withDataConverter(new NumberDataConverter<>(Double.class, numberFormatter))
                         .withDataExtractor(d -> d)
                         .build())
                 .build();

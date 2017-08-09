@@ -12,6 +12,7 @@ This is a lightweight and highly customizable, flexible and extensible data to p
 - **Different layout presets:** you can pick from one of the out-of-box layouts and use it as is, or tweak it for your needs.
 - **Sensible default values for easy prototyping:** use defaults for quick output then fine tune it later.
 - **Stateful columns and aggregation:** columns may maintain state information and provide aggregated values (such as sum).
+- **CSV export support:** out-of-box support for csv export.
 
 **<u>Main architectural features:</u>**
 
@@ -33,14 +34,9 @@ PTT follows a concept to allow easy user data to table conversion for any possib
 
 You can find the version history and change log in [changelog.md](changelog.md).
 
-## Roadmap
+## Getting started
 
-These are the planned features for the next releases:
-
-- [ ] CSV export
-- [ ] Ignore header (headless tables)
-- [ ] Export/inport configuration
-- [ ] Multiple aggregation lines/subtotal rows
+You can find detailed guide with examples in the [Wiki](https://github.com/balage1551/plain-text-table/wiki) pages of the library.
 
 ## The concept behind
 
