@@ -2,6 +2,7 @@
 build/
 /.classpath
 /.project
+.idea
 bin/
 .settings/
 .gradle/
