@@ -4,9 +4,11 @@ package hu.vissy.texttable.dsl
 
 import hu.vissy.texttable.TableFormatter
 import hu.vissy.texttable.column.ColumnDefinition
+import hu.vissy.texttable.column.ColumnDefinition.StatefulBuilder
 import hu.vissy.texttable.contentformatter.*
 import hu.vissy.texttable.contentformatter.EllipsisDecorator.TextSegment
 import hu.vissy.texttable.dataconverter.*
+import hu.vissy.texttable.dataextractor.StatefulDataExtractor
 import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.Duration
@@ -19,7 +21,7 @@ import java.util.*
 fun <D : Any> tableFormatter(op: TableFormatterBuilder<D>.() -> Unit) = TableFormatterBuilder<D>().apply(op).build()
 
 class TableFormatterBuilder<D : Any> {
-    private val columns = mutableListOf<ColumnDefinition<D, Void, *>>()
+    private val columns = mutableListOf<ColumnDefinition<D, *, *>>()
     var heading: String? = null
     var showAggregation = false
     var separateDataWithLines = false
@@ -38,6 +40,9 @@ class TableFormatterBuilder<D : Any> {
 
     fun <T : Any> simple(title: String = "", extractor: (D) -> T) =
             StatelessColumnBuilder<D, T>(title).apply { this.extractor = extractor }.build().apply { columns += this }
+
+    fun <T : Any, S : Any> stateful(op: StatefulColumnBuilder<D, S, T>.() -> Unit) =
+            StatefulColumnBuilder<D, S, T>().apply(op).build().apply { columns += this }
 
 }
 
@@ -59,6 +64,42 @@ class StatelessColumnBuilder<D : Any, T : Any>(var title: String = "") {
     fun build(): ColumnDefinition<D, Void, T> = ColumnDefinition.StatelessBuilder<D, T>()
             .withTitle(title)
             .withDataExtractor(extractor)
+            .withDataConverter(converter)
+            .withCellContentFormatter(cellFormatter)
+            .build()
+}
+
+
+class StatefulColumnBuilder<D : Any, S : Any, T : Any>(var title: String = "") {
+    var initState: (() -> S)? = null
+    var extractor: ((D, S) -> T?)? = null
+    var aggregator: (Any?, S) -> T? = { _, _ -> null }
+    var converter: DataConverter<T?> = TrivialDataConverter<T?>()
+    var cellFormatter: CellContentFormatter = CellContentFormatter.leftAlignedCell()
+
+    fun extractor(f: (D, S) -> T?) {
+        this.extractor = f
+    }
+
+    fun initState(f: () -> S) {
+        initState = f
+    }
+
+    fun aggregator(f: (Any?, S) -> T?) {
+        aggregator = f
+    }
+
+    inline fun <reified C : DataConverterBuilder<T?>> converter(op: C.() -> Unit = { -> }) =
+            C::class.java.getDeclaredConstructor().newInstance().apply(op).build().apply { converter = this }
+
+    fun cellFormatter(alignment: CellAlignmentMarker = left, op: CellContentFormatterBuilder.() -> Unit = { -> }) =
+            CellContentFormatterBuilder(alignment).apply(op).build().apply { cellFormatter = this }
+
+    fun build(): ColumnDefinition<D, S, T> = StatefulBuilder<D, S, T>()
+            .withTitle(title)
+            .withDataExtractor(StatefulDataExtractor(extractor,
+                    initState ?: error("initState should be provided ($title)"),
+                    aggregator))
             .withDataConverter(converter)
             .withCellContentFormatter(cellFormatter)
             .build()
@@ -190,7 +231,7 @@ object left : CellAlignmentMarker() {
 }
 
 @Suppress("ClassName")
-object right : CellAlignmentMarker(){
+object right : CellAlignmentMarker() {
     override fun build(padding: Char) = RightCellAlignment(padding)
 }
 
@@ -203,12 +244,12 @@ object center : CellAlignmentMarker() {
 class CellContentFormatterBuilder(alignment: CellAlignmentMarker = left) {
     private var cellAlignment: CellAlignment
 
-    var nullValue : String = ""
+    var nullValue: String = ""
 
-    var minWidth : Int = 0
-    var maxWidth : Int = Int.MAX_VALUE
+    var minWidth: Int = 0
+    var maxWidth: Int = Int.MAX_VALUE
 
-    var ellipsis : EllipsisDecorator = EllipsisDecorator.Builder().build()
+    var ellipsis: EllipsisDecorator = EllipsisDecorator.Builder().build()
 
     var padding: Char = ' '
         set(value) {
@@ -226,8 +267,7 @@ class CellContentFormatterBuilder(alignment: CellAlignmentMarker = left) {
         cellAlignment = alignment.build(padding)
     }
 
-    fun ellipsis(keep : TextSegmentMarker = segmentStart, sign: String = "...", op: EllipsisDecoratorBuilder.() -> Unit = {->})
-            = EllipsisDecoratorBuilder(keep, sign).apply(op).build().apply { ellipsis = this }
+    fun ellipsis(keep: TextSegmentMarker = segmentStart, sign: String = "...", op: EllipsisDecoratorBuilder.() -> Unit = { -> }) = EllipsisDecoratorBuilder(keep, sign).apply(op).build().apply { ellipsis = this }
 
 
     fun build(): CellContentFormatter = CellContentFormatter.Builder()
@@ -240,11 +280,13 @@ class CellContentFormatterBuilder(alignment: CellAlignmentMarker = left) {
 }
 
 
-sealed class TextSegmentMarker(val segment : TextSegment)
+sealed class TextSegmentMarker(val segment: TextSegment)
 @Suppress("ClassName")
 object segmentStart : TextSegmentMarker(TextSegment.START)
+
 @Suppress("ClassName")
 object segmentEnd : TextSegmentMarker(TextSegment.END)
+
 @Suppress("ClassName")
 object segmentCenter : TextSegmentMarker(TextSegment.CENTER)
 
@@ -252,7 +294,7 @@ object segmentCenter : TextSegmentMarker(TextSegment.CENTER)
 class EllipsisDecoratorBuilder(var keep: TextSegmentMarker = segmentStart, var sign: String = "...") {
     var trimToWord = false
 
-    fun build(): EllipsisDecorator  = EllipsisDecorator.Builder()
+    fun build(): EllipsisDecorator = EllipsisDecorator.Builder()
             .withEllipsisSign(sign)
             .withKeptPart(keep.segment)
             .withTrimToWord(trimToWord)

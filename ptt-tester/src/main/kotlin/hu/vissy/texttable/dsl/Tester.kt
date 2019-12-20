@@ -6,11 +6,18 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.floor
 
+private class SubTotalDemoAggregator {
+    var actFruit: String? = null
+    var fruitSum = 0.0
+    var totalSum = 0.0
+}
+
+
 fun main() {
     val formatter = tableFormatter<TestObject> {
         heading = "Test table"
         showAggregation = true
-        separateDataWithLines = true
+        separateDataWithLines = false
 
         simple<String>("Fruit") { d -> d.name }
         stateless<LocalDateTime> {
@@ -38,9 +45,19 @@ fun main() {
                 grouping = false
             }
         }
-        stateless<Double> {
+        stateful<Double, SubTotalDemoAggregator> {
             title = "quantity"
-            extractor { d -> d.quantity }
+            initState { SubTotalDemoAggregator() }
+            extractor { d, s ->
+                val v: Double = d.quantity
+                s.totalSum += v
+                s.fruitSum += v
+                v
+            }
+            aggregator { key, s ->
+                s.totalSum
+            }
+            cellFormatter(right)
             converter<DefaultDouble> {
                 minimumFractionDigits = 1
             }
