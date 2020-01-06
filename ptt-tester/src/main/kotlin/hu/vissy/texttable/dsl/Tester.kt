@@ -17,7 +17,31 @@ fun main() {
     val formatter = tableFormatter<TestObject> {
         heading = "Test table"
         showAggregation = true
-        separateDataWithLines = false
+        separateDataWithLines = true
+
+        border(UnicodeBorder)
+//        border {
+//            row {
+//                vertical('|')
+//            }
+//
+//            row(headingRow) {
+//                padding = '='
+//            }
+//            predefined(EmptyBorder)
+//
+//            drawVerticalSeparator = true
+//            drawVerticalEdge = true
+//            padding(1)
+//
+//            line {
+//                vertical('|')
+//                content('-')
+//            }
+//            line(topLine, bottomLine, headingLine, headerLine, aggregateLine) {
+//                content('=')
+//            }
+//        }
 
         simple<String>("Fruit") { d -> d.name }
         stateless<LocalDateTime> {

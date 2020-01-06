@@ -2,6 +2,9 @@
 
 package hu.vissy.texttable.dsl
 
+import hu.vissy.texttable.BorderFormatter
+import hu.vissy.texttable.BorderFormatter.LineType
+import hu.vissy.texttable.BorderFormatter.RowType
 import hu.vissy.texttable.TableFormatter
 import hu.vissy.texttable.column.ColumnDefinition
 import hu.vissy.texttable.column.ColumnDefinition.StatefulBuilder
@@ -17,6 +20,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.properties.Delegates
 
 fun <D : Any> tableFormatter(op: TableFormatterBuilder<D>.() -> Unit) = TableFormatterBuilder<D>().apply(op).build()
 
@@ -25,9 +29,11 @@ class TableFormatterBuilder<D : Any> {
     var heading: String? = null
     var showAggregation = false
     var separateDataWithLines = false
+    private val border = BorderBuilder()
 
     fun build(): TableFormatter<D>? {
         return TableFormatter.Builder<D>().apply {
+            withBorderFormatter(border.build())
             withHeading(heading)
             withShowAggregation(showAggregation)
             withSeparateDataWithLines(separateDataWithLines)
@@ -43,6 +49,9 @@ class TableFormatterBuilder<D : Any> {
 
     fun <T : Any, S : Any> stateful(op: StatefulColumnBuilder<D, S, T>.() -> Unit) =
             StatefulColumnBuilder<D, S, T>().apply(op).build().apply { columns += this }
+
+    fun border(predefined: PredefinedBorder? = null, op: BorderBuilder.() -> Unit = { -> }) =
+            border.apply { if (predefined != null) predefined(predefined) }.apply(op)
 
 }
 
@@ -92,6 +101,7 @@ class StatefulColumnBuilder<D : Any, S : Any, T : Any>(var title: String = "") {
     inline fun <reified C : DataConverterBuilder<T?>> converter(op: C.() -> Unit = { -> }) =
             C::class.java.getDeclaredConstructor().newInstance().apply(op).build().apply { converter = this }
 
+
     fun cellFormatter(alignment: CellAlignmentMarker = left, op: CellContentFormatterBuilder.() -> Unit = { -> }) =
             CellContentFormatterBuilder(alignment).apply(op).build().apply { cellFormatter = this }
 
@@ -109,6 +119,7 @@ class StatefulColumnBuilder<D : Any, S : Any, T : Any>(var title: String = "") {
 abstract class DataConverterBuilder<T> {
     abstract fun build(): DataConverter<T>
 }
+
 
 open class DefaultDate : DataConverterBuilder<LocalDate?>() {
     var format: String = "yyyy-MM-dd"
@@ -216,6 +227,7 @@ open class DefaultDouble : DefaultDecimal<Double>(Double::class.java) {
     }
 }
 
+
 class DefaultDuration : DataConverterBuilder<Duration?>() {
     override fun build(): DataConverter<Duration?> =
             SimpleDurationDataConverter()
@@ -302,3 +314,234 @@ class EllipsisDecoratorBuilder(var keep: TextSegmentMarker = segmentStart, var s
 
 }
 
+val topLine = LineType.TOP_EDGE
+val headingLine = LineType.HEADING_LINE
+val headerLine = LineType.HEADER_LINE
+val internalLine = LineType.INTERNAL_LINE
+val separatorLine = LineType.SEPARATOR_LINE
+val aggregateLine = LineType.AGGREGATE_LINE
+val bottomLine = LineType.BOTTOM_EDGE
+
+val headingRow = RowType.HEADING
+var headerRow = RowType.HEADER
+var dataRow = RowType.DATA
+var aggregateRow = RowType.AGGREGATE
+
+class BorderBuilder(predefined: PredefinedBorder? = null) {
+    private var lines: MutableMap<LineType, LineSpecBuilder> = LineType.values().associate { it to LineSpecBuilder() }.toMutableMap()
+    private var rows: MutableMap<RowType, RowSpecBuilder> = RowType.values().associate { it to RowSpecBuilder() }.toMutableMap()
+    var drawVerticalEdge = true
+    var drawVerticalSeparator = true
+
+    var leftPadding: Int = 1
+        set(value) {
+            field = if (value >= 0) value else field
+        }
+    var rightPadding: Int = 1
+        set(value) {
+            field = if (value >= 0) value else field
+        }
+
+    init {
+        predefined?.populate(this)
+    }
+
+    fun predefined(predefined: PredefinedBorder) {
+        predefined.populate(this)
+    }
+
+    fun padding(left: Int, right: Int) {
+        leftPadding = left
+        rightPadding = right
+    }
+
+    fun padding(padding: Int) = padding(padding, padding)
+    fun noPadding() = padding(0)
+
+    fun row(vararg rowTypes: RowType = RowType.values(), op: RowSpecBuilder.() -> Unit) {
+        rowTypes.forEach {
+            rows.getValue(it).apply(op)
+        }
+    }
+
+    fun line(vararg lineTypes: LineType = LineType.values(), op: LineSpecBuilder.() -> Unit) {
+        lineTypes.forEach {
+            lines.getValue(it).apply(op)
+        }
+    }
+
+    fun build(): BorderFormatter {
+        val bfb = BorderFormatter.Builder(BorderFormatter.DefaultFormatters.EMPTY)
+        for (lineDef in lines) {
+            bfb.withLine(lineDef.value.build(), lineDef.key)
+        }
+        for (rowDef in rows) {
+            bfb.withRow(rowDef.value.build(), rowDef.key)
+        }
+        return bfb
+                .withDrawVerticalEdge(drawVerticalEdge)
+                .withDrawVerticalSeparator(drawVerticalSeparator)
+                .withLeftPaddingWidth(leftPadding)
+                .withRightPaddingWidth(rightPadding)
+                .build()
+    }
+}
+
+
+abstract class SpecBuilder<T : BorderFormatter.LineSpec> {
+    protected fun resetHiddenDelegate(init: Char) =
+            Delegates.observable(init) { _, _, _ -> hidden = false }
+
+    var left: Char by resetHiddenDelegate(' ')
+    var internal: Char by resetHiddenDelegate(' ')
+    var right: Char by resetHiddenDelegate(' ')
+    var padding: Char by resetHiddenDelegate(' ')
+
+    protected open var hidden = false
+
+    open fun edge(c: Char) {
+        left = c
+        right = c
+    }
+
+    open fun vertical(c: Char) {
+        edge(c)
+        internal = c
+    }
+
+    abstract fun build(): T
+}
+
+
+class RowSpecBuilder : SpecBuilder<BorderFormatter.RowSpec>() {
+    override fun build(): BorderFormatter.RowSpec = BorderFormatter.RowSpec(left, internal, padding, right)
+}
+
+open class LineSpecBuilder : SpecBuilder<BorderFormatter.LineSpec>() {
+    var body: Char by resetHiddenDelegate(' ')
+
+    public override var hidden = false
+
+    fun content(c: Char) {
+        padding = c
+        body = c
+    }
+
+    override fun build(): BorderFormatter.LineSpec =
+            if (hidden) BorderFormatter.HIDDEN
+            else BorderFormatter.LineSpec(left, internal, padding, body, right)
+}
+
+
+abstract class PredefinedBorder {
+    abstract fun populate(builder: BorderBuilder)
+}
+
+const val empty = 0.toChar()
+
+object EmptyBorder : PredefinedBorder() {
+    override fun populate(builder: BorderBuilder) {
+        with(builder) {
+            drawVerticalEdge = false
+            drawVerticalSeparator = false
+            noPadding()
+            line {
+                hidden = true
+            }
+            row {
+                vertical(empty)
+                padding = empty
+            }
+        }
+    }
+}
+
+object SimpleAsciiBorder : PredefinedBorder() {
+    override fun populate(builder: BorderBuilder) {
+        with(builder) {
+            line {
+                vertical('+')
+                content('-')
+            }
+            row {
+                vertical('|')
+            }
+        }
+    }
+}
+
+object DoubleAsciiBorder : PredefinedBorder() {
+    override fun populate(builder: BorderBuilder) {
+        with(builder) {
+            line {
+                vertical('+')
+                content('=')
+            }
+            line(internalLine) {
+                content('-')
+            }
+            row {
+                vertical('|')
+            }
+        }
+    }
+}
+
+object NoVerticalBorder : PredefinedBorder() {
+    override fun populate(builder: BorderBuilder) {
+        with(builder) {
+            drawVerticalEdge = false
+            line {
+                vertical('-')
+                content('-')
+            }
+            line(headerLine, separatorLine, aggregateLine) {
+                edge('-')
+                internal = ' '
+            }
+            line(internalLine) {
+                hidden = true
+            }
+            row {
+                edge(' ')
+            }
+        }
+    }
+}
+
+
+object UnicodeBorder : PredefinedBorder() {
+    override fun populate(builder: BorderBuilder) {
+        with(builder) {
+            line(topLine) {
+                left = '╔'
+                internal = '╤'
+                content('═')
+                right = '╗'
+            }
+            line(headerLine, headingLine, separatorLine, aggregateLine) {
+                left = '╠'
+                internal = '╪'
+                content('═')
+                right = '╣'
+            }
+            line(internalLine) {
+                left = '╟'
+                internal = '┼'
+                content('─')
+                right = '╢'
+            }
+            line(bottomLine) {
+                left = '╚'
+                internal = '╧'
+                content('═')
+                right = '╝'
+            }
+
+            row {
+                edge('║')
+                internal = '│'
+            }
+        }
+    }
+}
